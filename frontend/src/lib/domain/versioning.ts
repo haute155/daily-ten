@@ -2,39 +2,6 @@ import dayjs from 'dayjs';
 import { ChecklistItem, ChecklistVersion, VersionDiff } from '@/lib/types';
 import { getCategoryLabel } from './categories';
 
-/**
- * 항목 identity 보호: 새로 만들어진 항목의 이름이 과거 버전에 존재했던 항목과 같으면
- * 그 항목의 id를 재사용한다. "삭제 후 같은 이름으로 재생성"해도 항목별 통계(달성률,
- * 기여도)가 끊기지 않고 이어지게 하기 위함이다. 가장 최근 버전의 항목을 우선한다.
- */
-export function reconcileItemIds(
-  items: ChecklistItem[],
-  versions: ChecklistVersion[]
-): ChecklistItem[] {
-  // 최신 버전부터 훑어 label → 과거 항목 매핑 (가장 최근 것 우선)
-  const historicalByLabel = new Map<string, ChecklistItem>();
-  for (const version of [...versions].sort((a, b) => b.versionNumber - a.versionNumber)) {
-    for (const item of version.items) {
-      const key = item.label.trim();
-      if (!historicalByLabel.has(key)) historicalByLabel.set(key, item);
-    }
-  }
-
-  const usedIds = new Set(items.map(i => i.id));
-
-  return items.map(item => {
-    // 편집 중 새로 추가된 항목만 대상 (id 패턴: item-<timestamp>)
-    if (!/^item-\d+$/.test(item.id)) return item;
-
-    const historical = historicalByLabel.get(item.label.trim());
-    if (!historical || usedIds.has(historical.id)) return item;
-
-    usedIds.delete(item.id);
-    usedIds.add(historical.id);
-    return { ...item, id: historical.id, createdAt: historical.createdAt };
-  });
-}
-
 /** 해당 날짜에 적용되는 버전. effectiveFrom이 지난 버전 중 가장 최신 버전을 고른다. */
 export function resolveActiveVersion(
   versions: ChecklistVersion[],

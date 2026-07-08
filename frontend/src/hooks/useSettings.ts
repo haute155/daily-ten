@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
 import { ChecklistItem } from '@/lib/types';
-import { resolveLatestVersion, reconcileItemIds } from '@/lib/domain/versioning';
+import { resolveLatestVersion } from '@/lib/domain/versioning';
 
 /**
  * 하이드레이션 완료 후에만 마운트되어야 한다 (AppGate 안에서 사용).
@@ -98,8 +98,7 @@ export function useSettings() {
   const handleSave = async (): Promise<boolean> => {
     if (!isValid || !hasChanges) return false;
     try {
-      // 삭제 후 같은 이름으로 재생성된 항목은 과거 id를 이어받아 통계 연속성 유지
-      await updateVersion(reconcileItemIds(items, versions));
+      await updateVersion(items);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
       return true;

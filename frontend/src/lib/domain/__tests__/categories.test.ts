@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { suggestCategory, getCategoryLabel } from '@/lib/domain/categories';
-import { reconcileItemIds, computeVersionDiff } from '@/lib/domain/versioning';
+import { computeVersionDiff } from '@/lib/domain/versioning';
 import { makeItem, makeVersion } from './helpers';
 
 describe('suggestCategory', () => {
@@ -25,52 +25,6 @@ describe('getCategoryLabel', () => {
     expect(getCategoryLabel('healing')).toBe('힐링');
     expect(getCategoryLabel('work')).toBe('업무');
     expect(getCategoryLabel(undefined)).toBe('미분류');
-  });
-});
-
-describe('reconcileItemIds (identity 보호)', () => {
-  const v1 = makeVersion({
-    id: 'v1',
-    versionNumber: 1,
-    items: [
-      makeItem({ id: 'old-exercise', label: '운동', weight: 5, order: 0 }),
-      makeItem({ id: 'old-reading', label: '독서', weight: 5, order: 1 }),
-    ],
-  });
-
-  it('삭제 후 같은 이름으로 재생성된 항목은 과거 id를 이어받는다', () => {
-    const items = [
-      makeItem({ id: 'item-1700000000000', label: '운동', weight: 5, order: 0 }), // 재생성
-      makeItem({ id: 'old-reading', label: '독서', weight: 5, order: 1 }),
-    ];
-    const result = reconcileItemIds(items, [v1]);
-    expect(result[0].id).toBe('old-exercise');
-  });
-
-  it('기존 id를 가진 항목은 건드리지 않는다', () => {
-    const items = [makeItem({ id: 'old-exercise', label: '완전히 새 이름', weight: 10, order: 0 })];
-    const result = reconcileItemIds(items, [v1]);
-    expect(result[0].id).toBe('old-exercise');
-  });
-
-  it('같은 라벨이 현재 목록에 이미 있으면 중복 id를 만들지 않는다', () => {
-    const items = [
-      makeItem({ id: 'old-exercise', label: '운동', weight: 5, order: 0 }),
-      makeItem({ id: 'item-1700000000001', label: '운동', weight: 5, order: 1 }),
-    ];
-    const result = reconcileItemIds(items, [v1]);
-    expect(result[1].id).toBe('item-1700000000001'); // old-exercise는 이미 사용 중
-  });
-
-  it('여러 버전 중 가장 최근 버전의 항목을 우선한다', () => {
-    const v2 = makeVersion({
-      id: 'v2',
-      versionNumber: 2,
-      items: [makeItem({ id: 'newer-exercise', label: '운동', weight: 10, order: 0 })],
-    });
-    const items = [makeItem({ id: 'item-1700000000002', label: '운동', weight: 10, order: 0 })];
-    const result = reconcileItemIds(items, [v1, v2]);
-    expect(result[0].id).toBe('newer-exercise');
   });
 });
 
