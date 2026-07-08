@@ -1,0 +1,132 @@
+'use client';
+
+import { ChecklistItem } from '@/lib/types';
+import { ChecklistItemCard } from './ChecklistItemCard';
+import { Button } from '@/components/ui/button';
+import { Plus, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+interface ChecklistEditorProps {
+  items: ChecklistItem[];
+  totalScore: number;
+  isValid: boolean;
+  /** 총점이 유효하고 실제 변경사항이 있을 때만 저장 가능 */
+  canSave: boolean;
+  hasTodayEntry: boolean;
+  saved: boolean;
+  onItemChange: (id: string, changes: Partial<ChecklistItem>) => void;
+  onItemAdd: () => void;
+  onItemRemove: (id: string) => void;
+  onItemMove: (id: string, direction: 'up' | 'down') => void;
+  onSave: () => void;
+}
+
+export function ChecklistEditor({
+  items,
+  totalScore,
+  isValid,
+  canSave,
+  hasTodayEntry,
+  saved,
+  onItemChange,
+  onItemAdd,
+  onItemRemove,
+  onItemMove,
+  onSave,
+}: ChecklistEditorProps) {
+  const remaining = 10 - totalScore;
+
+  return (
+    <div className="flex flex-col gap-3">
+      {/* Score indicator */}
+      <div
+        className={cn(
+          'flex items-center justify-between px-4 py-3 rounded-md border',
+          isValid
+            ? 'bg-brand/5 border-brand/25'
+            : totalScore > 10
+            ? 'bg-low/5 border-low/25'
+            : 'bg-neutral-50 border-neutral-200'
+        )}
+        aria-live="polite"
+      >
+        <div className="flex items-center gap-2">
+          {isValid ? (
+            <CheckCircle2 size={16} className="text-brand" aria-hidden="true" />
+          ) : (
+            <AlertCircle size={16} className={totalScore > 10 ? 'text-low' : 'text-neutral-500'} aria-hidden="true" />
+          )}
+          <span className="text-sm font-medium text-neutral-700">
+            {isValid
+              ? '총점 10점 완성!'
+              : totalScore > 10
+              ? `${totalScore - 10}점 초과`
+              : `${remaining}점 남음`}
+          </span>
+        </div>
+        <span
+          className={cn(
+            'text-xl font-bold tabular-nums',
+            isValid ? 'text-brand' : totalScore > 10 ? 'text-low' : 'text-neutral-900'
+          )}
+          aria-label={`현재 총점 ${totalScore}점`}
+        >
+          {totalScore}
+          <span className="text-sm text-neutral-400 font-normal">/10</span>
+        </span>
+      </div>
+
+      {/* Items */}
+      <div className="flex flex-col gap-2" role="list" aria-label="체크리스트 항목">
+        {items.map((item, idx) => (
+          <div key={item.id} role="listitem">
+            <ChecklistItemCard
+              item={item}
+              index={idx}
+              total={items.length}
+              onChange={onItemChange}
+              onRemove={onItemRemove}
+              onMove={onItemMove}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Add item */}
+      <Button
+        variant="outline"
+        onClick={onItemAdd}
+        className="h-10 border-dashed border-neutral-300 text-neutral-500 hover:text-brand hover:border-brand/30 rounded-md"
+        aria-label="항목 추가"
+      >
+        <Plus size={16} className="mr-1.5" aria-hidden="true" />
+        항목 추가
+      </Button>
+
+      {/* Warning */}
+      {hasTodayEntry && (
+        <div className="flex items-start gap-2 px-3 py-2.5 rounded-md bg-neutral-100 border border-neutral-200">
+          <AlertCircle size={14} className="text-neutral-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
+          <p className="text-xs text-neutral-700">오늘 이미 기록이 있습니다. 변경사항은 내일부터 적용됩니다.</p>
+        </div>
+      )}
+
+      {/* Save */}
+      {saved ? (
+        <div className="flex items-center justify-center gap-2 h-12 rounded-lg bg-brand/5 border border-brand/25">
+          <CheckCircle2 size={16} className="text-brand" aria-hidden="true" />
+          <span className="text-sm font-semibold text-brand">새 버전 저장됨!</span>
+        </div>
+      ) : (
+        <Button
+          onClick={onSave}
+          disabled={!canSave}
+          className="h-12 text-base font-semibold rounded-lg bg-neutral-900 hover:bg-neutral-700 text-white shadow-sm disabled:opacity-50"
+          aria-label="새 버전 저장"
+        >
+          새 버전으로 저장
+        </Button>
+      )}
+    </div>
+  );
+}
