@@ -5,6 +5,20 @@ import { ChecklistItemCard } from './ChecklistItemCard';
 import { Button } from '@/components/ui/button';
 import { Plus, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  DndContext,
+  DragEndEvent,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 
 interface ChecklistEditorProps {
   items: ChecklistItem[];
@@ -17,7 +31,8 @@ interface ChecklistEditorProps {
   onItemChange: (id: string, changes: Partial<ChecklistItem>) => void;
   onItemAdd: () => void;
   onItemRemove: (id: string) => void;
-  onItemMove: (id: string, direction: 'up' | 'down') => void;
+  onItemMoveTo: (id: string, toIndex: number) => void;
+  onItemReorder: (activeId: string, overId: string) => void;
   onSave: () => void;
 }
 
@@ -31,10 +46,22 @@ export function ChecklistEditor({
   onItemChange,
   onItemAdd,
   onItemRemove,
-  onItemMove,
+  onItemMoveTo,
+  onItemReorder,
   onSave,
 }: ChecklistEditorProps) {
   const remaining = 10 - totalScore;
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    onItemReorder(String(active.id), String(over.id));
+  };
 
   return (
     <div className="flex flex-col gap-3">
@@ -76,21 +103,36 @@ export function ChecklistEditor({
         </span>
       </div>
 
+      {/* Column headers — 항목 행 레이아웃(핸들/순서/이름/가중치/삭제)과 정렬 맞춤 */}
+      {items.length > 0 && (
+        <div className="flex items-center gap-2 px-3 text-[11px] font-medium text-neutral-400" aria-hidden="true">
+          <div className="w-9 flex-shrink-0" /> {/* 드래그 핸들 자리 */}
+          <div className="w-8 text-center flex-shrink-0">순서</div>
+          <div className="flex-1">항목 이름</div>
+          <div className="w-[92px] text-center flex-shrink-0">가중치</div>
+          <div className="w-7 flex-shrink-0" /> {/* 삭제 버튼 자리 */}
+        </div>
+      )}
+
       {/* Items */}
-      <div className="flex flex-col gap-2" role="list" aria-label="체크리스트 항목">
-        {items.map((item, idx) => (
-          <div key={item.id} role="listitem">
-            <ChecklistItemCard
-              item={item}
-              index={idx}
-              total={items.length}
-              onChange={onItemChange}
-              onRemove={onItemRemove}
-              onMove={onItemMove}
-            />
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={items.map(item => item.id)} strategy={verticalListSortingStrategy}>
+          <div className="flex flex-col gap-2" role="list" aria-label="체크리스트 항목">
+            {items.map((item, idx) => (
+              <div key={item.id} role="listitem">
+                <ChecklistItemCard
+                  item={item}
+                  index={idx}
+                  total={items.length}
+                  onChange={onItemChange}
+                  onRemove={onItemRemove}
+                  onMoveTo={onItemMoveTo}
+                />
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </SortableContext>
+      </DndContext>
 
       {/* Add item */}
       <Button

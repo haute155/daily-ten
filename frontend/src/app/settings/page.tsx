@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useSettings } from '@/hooks/useSettings';
 import { ChecklistEditor } from '@/components/settings/ChecklistEditor';
 import { VersionDiffCard } from '@/components/settings/VersionDiffCard';
@@ -9,8 +10,17 @@ import { useRouter } from 'next/navigation';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Separator } from '@/components/ui/separator';
 import { AppGate } from '@/components/shared/AppGate';
+import { Button } from '@/components/ui/button';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet';
 import { api } from '@/lib/api';
 import { useAppStore } from '@/store/appStore';
+import { SlidersHorizontal } from 'lucide-react';
 
 export default function SettingsPage() {
   return (
@@ -22,6 +32,7 @@ export default function SettingsPage() {
 
 function SettingsPageContent() {
   const router = useRouter();
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
   const {
     currentVersion,
     versions,
@@ -34,8 +45,10 @@ function SettingsPageContent() {
     updateItem,
     addItem,
     removeItem,
-    moveItem,
+    moveItemTo,
+    reorderItems,
     handleSave,
+    reset,
   } = useSettings();
 
   // Find the version just before current to show diff
@@ -45,6 +58,20 @@ function SettingsPageContent() {
 
   const isTomorrowEffective =
     !!currentVersion && currentVersion.effectiveFrom > dayjs().format('YYYY-MM-DD');
+
+  const onSave = async () => {
+    const success = await handleSave();
+    if (success) {
+      setIsEditorOpen(false);
+    }
+  };
+
+  const onSheetOpenChange = (open: boolean) => {
+    if (!open) {
+      reset();
+    }
+    setIsEditorOpen(open);
+  };
 
   return (
     <div className="flex flex-col">
@@ -68,6 +95,16 @@ function SettingsPageContent() {
                 ? `${currentVersion.effectiveFrom}부터 적용 예정`
                 : `${currentVersion.effectiveFrom}부터 적용 중`}
             </p>
+
+            {/* Read-only item summary */}
+            <ul className="flex flex-col gap-1 mt-3 pt-3 border-t border-brand/10">
+              {currentVersion.items.map(item => (
+                <li key={item.id} className="flex items-center justify-between text-sm">
+                  <span className="text-neutral-700">{item.label}</span>
+                  <span className="text-neutral-500 font-medium tabular-nums">{item.weight}점</span>
+                </li>
+              ))}
+            </ul>
           </div>
         ) : (
           <div className="p-3 rounded-md bg-neutral-50 border border-neutral-200 mb-4">
@@ -78,19 +115,13 @@ function SettingsPageContent() {
           </div>
         )}
 
-        <ChecklistEditor
-          items={items}
-          totalScore={totalScore}
-          isValid={isValid}
-          canSave={isValid && hasChanges}
-          hasTodayEntry={hasTodayEntry}
-          saved={saved}
-          onItemChange={updateItem}
-          onItemAdd={addItem}
-          onItemRemove={removeItem}
-          onItemMove={moveItem}
-          onSave={handleSave}
-        />
+        <Button
+          onClick={() => setIsEditorOpen(true)}
+          className="w-full h-12 text-base font-semibold rounded-lg bg-neutral-900 hover:bg-neutral-700 text-white shadow-sm"
+        >
+          <SlidersHorizontal size={16} className="mr-1.5" aria-hidden="true" />
+          체크리스트 편집
+        </Button>
       </div>
 
       {/* Show diff after save */}
@@ -121,6 +152,37 @@ function SettingsPageContent() {
           로그아웃
         </button>
       </div>
+
+      {/* Edit bottom sheet */}
+      <Sheet open={isEditorOpen} onOpenChange={onSheetOpenChange}>
+        <SheetContent side="bottom" className="h-[85vh] max-h-[85vh]">
+          <SheetHeader>
+            <SheetTitle>체크리스트 편집</SheetTitle>
+            <SheetDescription>
+              {hasTodayEntry
+                ? '변경사항은 내일부터 적용됩니다.'
+                : '항목을 추가, 수정, 삭제하고 순서를 조정하세요.'}
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="flex-1 overflow-y-auto px-4 pb-4">
+            <ChecklistEditor
+              items={items}
+              totalScore={totalScore}
+              isValid={isValid}
+              canSave={isValid && hasChanges}
+              hasTodayEntry={hasTodayEntry}
+              saved={saved}
+              onItemChange={updateItem}
+              onItemAdd={addItem}
+              onItemRemove={removeItem}
+              onItemMoveTo={moveItemTo}
+              onItemReorder={reorderItems}
+              onSave={onSave}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

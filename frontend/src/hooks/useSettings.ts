@@ -59,28 +59,46 @@ export function useSettings() {
     setItems(prev => prev.filter(item => item.id !== id));
   };
 
-  const moveItem = (id: string, direction: 'up' | 'down') => {
+  /** 순서 숫자 인풋에서 지정 위치로 항목을 이동 (범위 밖 인덱스는 클램프) */
+  const moveItemTo = (id: string, toIndex: number) => {
     setItems(prev => {
       const idx = prev.findIndex(item => item.id === id);
       if (idx === -1) return prev;
-      if (direction === 'up' && idx === 0) return prev;
-      if (direction === 'down' && idx === prev.length - 1) return prev;
+      const clamped = Math.min(Math.max(toIndex, 0), prev.length - 1);
+      if (clamped === idx) return prev;
 
       const newItems = [...prev];
-      const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
-      [newItems[idx], newItems[swapIdx]] = [newItems[swapIdx], newItems[idx]];
+      const [moved] = newItems.splice(idx, 1);
+      newItems.splice(clamped, 0, moved);
       return newItems.map((item, i) => ({ ...item, order: i }));
     });
   };
 
-  const handleSave = async () => {
-    if (!isValid || !hasChanges) return;
+  /** dnd-kit onDragEnd에서 사용: activeId를 overId 위치로 재정렬 */
+  const reorderItems = (activeId: string, overId: string) => {
+    if (activeId === overId) return;
+    setItems(prev => {
+      const fromIdx = prev.findIndex(item => item.id === activeId);
+      const toIdx = prev.findIndex(item => item.id === overId);
+      if (fromIdx === -1 || toIdx === -1) return prev;
+
+      const newItems = [...prev];
+      const [moved] = newItems.splice(fromIdx, 1);
+      newItems.splice(toIdx, 0, moved);
+      return newItems.map((item, i) => ({ ...item, order: i }));
+    });
+  };
+
+  const handleSave = async (): Promise<boolean> => {
+    if (!isValid || !hasChanges) return false;
     try {
       await updateVersion(items);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
+      return true;
     } catch (e) {
       toast.error(e instanceof Error ? e.message : '저장에 실패했습니다');
+      return false;
     }
   };
 
@@ -100,7 +118,8 @@ export function useSettings() {
     updateItem,
     addItem,
     removeItem,
-    moveItem,
+    moveItemTo,
+    reorderItems,
     handleSave,
     reset,
   };

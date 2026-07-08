@@ -1,8 +1,11 @@
 'use client';
 
+import { useState } from 'react';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { ChecklistItem } from '@/lib/types';
 import { Input } from '@/components/ui/input';
-import { ChevronUp, ChevronDown, Trash2, Minus, Plus } from 'lucide-react';
+import { GripVertical, Trash2, Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ChecklistItemCardProps {
@@ -11,7 +14,7 @@ interface ChecklistItemCardProps {
   total: number;
   onChange: (id: string, changes: Partial<ChecklistItem>) => void;
   onRemove: (id: string) => void;
-  onMove: (id: string, direction: 'up' | 'down') => void;
+  onMoveTo: (id: string, toIndex: number) => void;
 }
 
 export function ChecklistItemCard({
@@ -20,38 +23,78 @@ export function ChecklistItemCard({
   total,
   onChange,
   onRemove,
-  onMove,
+  onMoveTo,
 }: ChecklistItemCardProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: item.id,
+  });
+  // index는 상위에서 내려오는 파생값이라 렌더마다 바뀔 수 있다.
+  // 편집 중(isEditingOrder)에는 로컬 draft를 보여주고, 아닐 땐 항상 최신 index를 그대로 표시한다
+  // (useEffect로 동기화하면 set-state-in-effect 린트에 걸리고 오래된 값이 남을 수 있다).
+  const [isEditingOrder, setIsEditingOrder] = useState(false);
+  const [orderDraft, setOrderDraft] = useState('');
+  const orderValue = isEditingOrder ? orderDraft : String(index + 1);
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  const commitOrder = (value: string) => {
+    setIsEditingOrder(false);
+    const parsed = Number.parseInt(value, 10);
+    if (Number.isNaN(parsed)) return;
+    onMoveTo(item.id, parsed - 1);
+  };
+
   return (
-    <div className="flex items-center gap-2 p-3 rounded-md bg-white border border-neutral-100 shadow-sm">
-      {/* Reorder buttons */}
-      <div className="flex flex-col gap-0.5">
-        <button
-          type="button"
-          onClick={() => onMove(item.id, 'up')}
-          disabled={index === 0}
-          className={cn(
-            'w-6 h-6 rounded flex items-center justify-center text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 disabled:opacity-20 disabled:cursor-not-allowed transition-colors'
-          )}
-          aria-label={`${item.label} 위로 이동`}
-        >
-          <ChevronUp size={14} />
-        </button>
-        <button
-          type="button"
-          onClick={() => onMove(item.id, 'down')}
-          disabled={index === total - 1}
-          className="w-6 h-6 rounded flex items-center justify-center text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
-          aria-label={`${item.label} 아래로 이동`}
-        >
-          <ChevronDown size={14} />
-        </button>
-      </div>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        'flex items-center gap-2 p-3 rounded-md bg-white border border-neutral-100 shadow-sm',
+        isDragging && 'shadow-md ring-1 ring-brand/30 relative z-10'
+      )}
+    >
+      {/* Drag handle */}
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        className="w-11 h-11 -my-1 -ml-2 flex-shrink-0 rounded flex items-center justify-center text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 touch-none cursor-grab active:cursor-grabbing"
+        style={{ touchAction: 'none' }}
+        aria-label={`${item.label} 드래그하여 순서 변경`}
+      >
+        <GripVertical size={16} />
+      </button>
+
+      {/* Order number */}
+      <input
+        type="text"
+        inputMode="numeric"
+        value={orderValue}
+        onChange={e => setOrderDraft(e.target.value)}
+        onFocus={e => {
+          setIsEditingOrder(true);
+          setOrderDraft(String(index + 1));
+          e.target.select();
+        }}
+        onBlur={e => commitOrder(e.target.value)}
+        onKeyDown={e => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            (e.target as HTMLInputElement).blur();
+          }
+        }}
+        className="w-8 h-8 text-center text-sm font-semibold text-neutral-600 rounded-md border border-neutral-200 tabular-nums focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:border-brand"
+        aria-label={`${item.label} 순서 (현재 ${index + 1}번째, 총 ${total}개)`}
+      />
 
       {/* Label */}
       <Input
         value={item.label}
         onChange={e => onChange(item.id, { label: e.target.value })}
+        onFocus={e => e.target.select()}
         className="flex-1 h-9 text-sm border-neutral-200 focus:ring-brand/30"
         placeholder="항목 이름"
         aria-label="항목 이름"
