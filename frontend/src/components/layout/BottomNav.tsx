@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 const navItems = [
   { href: '/today', label: '오늘', icon: Home },
   { href: '/history', label: '기록', icon: CalendarDays },
-  { href: '/settings', label: '레시피', icon: SlidersHorizontal },
+  { href: '/recipe', label: '레시피', icon: SlidersHorizontal },
   { href: '/stats', label: '분석', icon: BarChart2 },
 ];
 

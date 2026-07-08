@@ -49,7 +49,7 @@ function TodayPageContent() {
           </p>
         </div>
         <Link
-          href="/settings"
+          href="/recipe"
           className="h-12 px-6 inline-flex items-center rounded-md bg-neutral-900 hover:bg-neutral-700 text-white text-base font-semibold"
         >
           텐 레시피 만들기
@@ -61,14 +61,23 @@ function TodayPageContent() {
   return (
     <div className="flex flex-col pt-6 pb-4">
       {/* Header */}
-      <div className="px-4 mb-4">
-        <p className="text-sm text-neutral-400">{greeting}</p>
-        <h1 className="text-2xl font-black text-neutral-900 mt-0.5 tracking-tight">{today}</h1>
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-xs text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded-sm">
-            레시피 v{version.versionNumber}
-          </span>
+      <div className="px-4 mb-4 flex items-start justify-between gap-2">
+        <div>
+          <p className="text-sm text-neutral-400">{greeting}</p>
+          <h1 className="text-2xl font-black text-neutral-900 mt-0.5 tracking-tight">{today}</h1>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-xs text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded-sm">
+              레시피 v{version.versionNumber}
+            </span>
+          </div>
         </div>
+        <Link
+          href="/settings"
+          className="w-10 h-10 -mr-1 rounded-md flex items-center justify-center text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors"
+          aria-label="설정"
+        >
+          <Settings size={20} />
+        </Link>
       </div>
 
       {/* Insight banner */}
