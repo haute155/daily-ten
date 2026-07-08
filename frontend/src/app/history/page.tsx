@@ -88,8 +88,8 @@ function HistoryPageContent() {
                     <li key={item.id} className="flex items-center gap-2 text-sm">
                       <span
                         className={cn(
-                          'w-4 h-4 rounded-[3px] border flex items-center justify-center flex-shrink-0',
-                          checked ? 'bg-brand border-brand' : 'border-neutral-300'
+                          'w-4 h-4 rounded-[3px] border-2 flex items-center justify-center flex-shrink-0',
+                          checked ? 'bg-brand border-brand' : 'bg-white border-neutral-300'
                         )}
                         aria-hidden="true"
                       >
