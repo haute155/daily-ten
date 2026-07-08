@@ -206,7 +206,8 @@
 
 버전과 날짜별 기록이 명확히 분리되는 구조를 유지한다. (실제 타입: `src/lib/types.ts`)
 
-- **ChecklistItem** — id, label, weight, order, isActive, category?(운동·수면·학습·힐링·식습관·업무, 미지정=미분류), createdAt, updatedAt
+- **ChecklistItem** — id, label, weight, order, isActive, category?(기본 6종 키 또는 커스텀 카테고리 id, 미지정=미분류), createdAt, updatedAt
+- **CustomCategory** — id, label. 사용자가 직접 추가한 분류 (기본 6종은 코드 상수). 삭제 시 해당 항목들은 미분류로 표시
 - **ChecklistVersion** — id, versionNumber, title, items[], totalScore, changeSummary, effectiveFrom, effectiveTo(null=현재), createdAt
 - **DailyEntry** — id, date(YYYY-MM-DD), checklistVersionId, checkedItemIds[], score, note, createdAt, updatedAt
 - **VersionDiff** — versionId, previousVersionId, changes[] (type: add | remove | rename | reorder | weight-change, before/after, description)

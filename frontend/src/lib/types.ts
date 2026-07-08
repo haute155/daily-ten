@@ -1,5 +1,11 @@
-/** 항목 카테고리 — 분석(카테고리별 기여도)을 위한 통제된 분류. 미지정 = 미분류 */
+/** 기본 카테고리 키 — 코드에 고정된 6종. 자동 분류·공통 통계의 기준 */
 export type CategoryKey = 'exercise' | 'sleep' | 'learning' | 'healing' | 'diet' | 'work';
+
+/** 사용자 정의 카테고리 — 기본 6종 외에 사용자가 직접 추가한 분류 */
+export type CustomCategory = {
+  id: string;
+  label: string;
+};
 
 export type ChecklistItem = {
   id: string;
@@ -7,7 +13,8 @@ export type ChecklistItem = {
   weight: number;
   order: number;
   isActive: boolean;
-  category?: CategoryKey;
+  /** 기본 카테고리 키(CategoryKey) 또는 커스텀 카테고리 id. 미지정 = 미분류 */
+  category?: string;
   createdAt: string;
   updatedAt: string;
 };

@@ -9,6 +9,7 @@ import { getCategoryLabel } from '@/lib/domain/categories';
 export function useStats() {
   const entries = useAppStore(s => s.entries);
   const versions = useAppStore(s => s.versions);
+  const customCategories = useAppStore(s => s.customCategories);
 
   const summary = useMemo(() => getInsightSummary(entries), [entries]);
 
@@ -90,7 +91,7 @@ export function useStats() {
 
       version.items.forEach(item => {
         if (!item.isActive || !entry.checkedItemIds.includes(item.id)) return;
-        const label = getCategoryLabel(item.category);
+        const label = getCategoryLabel(item.category, customCategories);
         earned.set(label, (earned.get(label) ?? 0) + item.weight);
         totalEarned += item.weight;
       });
@@ -103,7 +104,7 @@ export function useStats() {
         share: totalEarned > 0 ? Math.round((points / totalEarned) * 100) : 0,
       }))
       .sort((a, b) => b.points - a.points);
-  }, [entries, versions]);
+  }, [entries, versions, customCategories]);
 
   const versionStats = useMemo(() => {
     // 기록이 하나도 없는 버전(발효 전 draft 포함)은 비교 대상에서 제외 — 의미 있는 버전만 비교

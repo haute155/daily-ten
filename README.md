@@ -55,6 +55,7 @@ pnpm build       # 전체 빌드
 | GET | /auth/me | 토큰 검증 + 내 정보 |
 | GET/POST | /versions | 체크리스트 버전 목록 / 새 버전 생성 |
 | GET | /entries | 날짜별 기록 목록 |
+| GET/POST/PATCH/DELETE | /categories | 사용자 정의 카테고리 CRUD |
 | PUT | /entries/:date | 해당 날짜 기록 생성·수정 (upsert) |
 
 도메인 규칙(가중치 합 10점, 버전 append-only, 오늘 기록 시 변경은 내일부터, 점수 서버 재계산)은 **서버가 최종 보장**합니다. 상세 규칙과 아키텍처는 `docs/AI_DEV_SPEC.md`, 제품 기획은 `docs/PRD.md` 참고.

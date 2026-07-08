@@ -18,6 +18,8 @@ import {
   SheetDescription,
 } from '@/components/ui/sheet';
 import { SlidersHorizontal, Clock } from 'lucide-react';
+import { toast } from 'sonner';
+import { useAppStore } from '@/store/appStore';
 
 export default function SettingsPage() {
   return (
@@ -29,6 +31,17 @@ export default function SettingsPage() {
 
 function SettingsPageContent() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const customCategories = useAppStore(s => s.customCategories);
+
+  const handleCreateCategory = async (label: string): Promise<string | null> => {
+    try {
+      const created = await useAppStore.getState().addCategory(label);
+      return created.id;
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : '카테고리를 추가하지 못했습니다');
+      return null;
+    }
+  };
   const {
     currentVersion,
     versions,
@@ -177,6 +190,8 @@ function SettingsPageContent() {
               onItemRemove={removeItem}
               onItemMoveTo={moveItemTo}
               onItemReorder={reorderItems}
+              customCategories={customCategories}
+              onCreateCategory={handleCreateCategory}
               onSave={onSave}
             />
           </div>

@@ -3,10 +3,10 @@ import {
   ArrayNotEmpty,
   IsArray,
   IsBoolean,
-  IsIn,
   IsInt,
   IsOptional,
   IsString,
+  MaxLength,
   Matches,
   Min,
   ValidateNested,
@@ -28,9 +28,11 @@ export class ChecklistItemDto {
   @IsString()
   label: string;
 
+  // 기본 키('exercise' 등) 또는 커스텀 카테고리 id — 표시용 메타데이터라 느슨히 검증
   @IsOptional()
-  @IsIn(CATEGORY_KEYS, { message: '유효하지 않은 카테고리입니다' })
-  category?: (typeof CATEGORY_KEYS)[number];
+  @IsString()
+  @MaxLength(40)
+  category?: string;
 
   @IsInt()
   @Min(1)

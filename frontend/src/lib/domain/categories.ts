@@ -1,4 +1,4 @@
-import { CategoryKey } from '@/lib/types';
+import { CategoryKey, CustomCategory } from '@/lib/types';
 
 export const CATEGORIES: Array<{ key: CategoryKey; label: string }> = [
   { key: 'exercise', label: '운동' },
@@ -15,8 +15,11 @@ export const CATEGORY_LABELS: Record<CategoryKey, string> = Object.fromEntries(
 
 export const UNCATEGORIZED_LABEL = '미분류';
 
-export function getCategoryLabel(category?: CategoryKey): string {
-  return category ? CATEGORY_LABELS[category] : UNCATEGORIZED_LABEL;
+/** 기본 키 → 기본 라벨, 커스텀 id → 커스텀 라벨, 그 외(삭제된 커스텀 포함) → 미분류 */
+export function getCategoryLabel(category?: string, customCategories?: CustomCategory[]): string {
+  if (!category) return UNCATEGORIZED_LABEL;
+  if (category in CATEGORY_LABELS) return CATEGORY_LABELS[category as CategoryKey];
+  return customCategories?.find(c => c.id === category)?.label ?? UNCATEGORIZED_LABEL;
 }
 
 /**

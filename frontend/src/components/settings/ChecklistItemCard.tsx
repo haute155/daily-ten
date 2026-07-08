@@ -3,28 +3,35 @@
 import { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { ChecklistItem, CategoryKey } from '@/lib/types';
+import { ChecklistItem, CustomCategory } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { GripVertical, Trash2, Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CATEGORIES, UNCATEGORIZED_LABEL, suggestCategory } from '@/lib/domain/categories';
 
+const NEW_CATEGORY_VALUE = '__new__';
+
 interface ChecklistItemCardProps {
   item: ChecklistItem;
   index: number;
   total: number;
+  customCategories: CustomCategory[];
   onChange: (id: string, changes: Partial<ChecklistItem>) => void;
   onRemove: (id: string) => void;
   onMoveTo: (id: string, toIndex: number) => void;
+  /** 새 커스텀 카테고리 생성 — 성공 시 id 반환 */
+  onCreateCategory: (label: string) => Promise<string | null>;
 }
 
 export function ChecklistItemCard({
   item,
   index,
   total,
+  customCategories,
   onChange,
   onRemove,
   onMoveTo,
+  onCreateCategory,
 }: ChecklistItemCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
@@ -111,9 +118,18 @@ export function ChecklistItemCard({
         />
         <select
           value={item.category ?? ''}
-          onChange={e =>
-            onChange(item.id, { category: (e.target.value || undefined) as CategoryKey | undefined })
-          }
+          onChange={async e => {
+            const value = e.target.value;
+            if (value === NEW_CATEGORY_VALUE) {
+              const label = window.prompt('새 카테고리 이름 (10자 이내)');
+              if (label?.trim()) {
+                const createdId = await onCreateCategory(label.trim());
+                if (createdId) onChange(item.id, { category: createdId });
+              }
+              return;
+            }
+            onChange(item.id, { category: value || undefined });
+          }}
           className={cn(
             'h-7 w-fit text-xs rounded-md border border-neutral-200 bg-white px-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/40',
             item.category ? 'text-brand font-medium' : 'text-neutral-400'
@@ -126,6 +142,12 @@ export function ChecklistItemCard({
               {c.label}
             </option>
           ))}
+          {customCategories.map(c => (
+            <option key={c.id} value={c.id}>
+              {c.label}
+            </option>
+          ))}
+          <option value={NEW_CATEGORY_VALUE}>＋ 새 카테고리…</option>
         </select>
       </div>
 

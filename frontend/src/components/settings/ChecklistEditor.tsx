@@ -1,6 +1,6 @@
 'use client';
 
-import { ChecklistItem } from '@/lib/types';
+import { ChecklistItem, CustomCategory } from '@/lib/types';
 import { ChecklistItemCard } from './ChecklistItemCard';
 import { Button } from '@/components/ui/button';
 import { Plus, AlertCircle, CheckCircle2 } from 'lucide-react';
@@ -28,11 +28,13 @@ interface ChecklistEditorProps {
   canSave: boolean;
   hasTodayEntry: boolean;
   saved: boolean;
+  customCategories: CustomCategory[];
   onItemChange: (id: string, changes: Partial<ChecklistItem>) => void;
   onItemAdd: () => void;
   onItemRemove: (id: string) => void;
   onItemMoveTo: (id: string, toIndex: number) => void;
   onItemReorder: (activeId: string, overId: string) => void;
+  onCreateCategory: (label: string) => Promise<string | null>;
   onSave: () => void;
 }
 
@@ -43,11 +45,13 @@ export function ChecklistEditor({
   canSave,
   hasTodayEntry,
   saved,
+  customCategories,
   onItemChange,
   onItemAdd,
   onItemRemove,
   onItemMoveTo,
   onItemReorder,
+  onCreateCategory,
   onSave,
 }: ChecklistEditorProps) {
   const remaining = 10 - totalScore;
@@ -124,9 +128,11 @@ export function ChecklistEditor({
                   item={item}
                   index={idx}
                   total={items.length}
+                  customCategories={customCategories}
                   onChange={onItemChange}
                   onRemove={onItemRemove}
                   onMoveTo={onItemMoveTo}
+                  onCreateCategory={onCreateCategory}
                 />
               </div>
             ))}

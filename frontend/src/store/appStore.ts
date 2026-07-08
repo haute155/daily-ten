@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import dayjs from 'dayjs';
-import { ChecklistVersion, DailyEntry, ChecklistItem } from '@/lib/types';
+import { ChecklistVersion, CustomCategory, DailyEntry, ChecklistItem } from '@/lib/types';
 import { api } from '@/lib/api';
 import { createNewVersion, isDraftVersion, resolveLatestVersion } from '@/lib/domain/versioning';
 
@@ -11,6 +11,7 @@ type LoadStatus = 'idle' | 'loading' | 'ready' | 'error';
 interface AppStore {
   versions: ChecklistVersion[];
   entries: DailyEntry[];
+  customCategories: CustomCategory[];
   status: LoadStatus;
 
   // Selectors (이벤트 핸들러용 — 렌더 파생값은 구독 상태에서 직접 계산할 것)
@@ -26,12 +27,16 @@ interface AppStore {
     checklistVersionId?: string
   ) => Promise<void>;
   updateVersion: (newItems: ChecklistItem[]) => Promise<void>;
+  addCategory: (label: string) => Promise<CustomCategory>;
+  renameCategory: (id: string, label: string) => Promise<void>;
+  removeCategory: (id: string) => Promise<void>;
   reset: () => void;
 }
 
 export const useAppStore = create<AppStore>()((set, get) => ({
   versions: [],
   entries: [],
+  customCategories: [],
   status: 'idle',
 
   getTodayEntry: () => {
@@ -42,8 +47,12 @@ export const useAppStore = create<AppStore>()((set, get) => ({
   loadAll: async () => {
     set({ status: 'loading' });
     try {
-      const [versions, entries] = await Promise.all([api.getVersions(), api.getEntries()]);
-      set({ versions, entries, status: 'ready' });
+      const [versions, entries, customCategories] = await Promise.all([
+        api.getVersions(),
+        api.getEntries(),
+        api.getCategories(),
+      ]);
+      set({ versions, entries, customCategories, status: 'ready' });
     } catch (e) {
       set({ status: 'error' });
       throw e;
@@ -76,7 +85,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
       ? resolveLatestVersion(versions.filter(v => v.id !== latest.id))
       : latest;
 
-    const { version: draft } = createNewVersion(baseline, newItems);
+    const { version: draft } = createNewVersion(baseline, newItems, undefined, get().customCategories);
 
     await api.createVersion({
       items: newItems,
@@ -91,5 +100,25 @@ export const useAppStore = create<AppStore>()((set, get) => ({
     set({ versions: fresh });
   },
 
-  reset: () => set({ versions: [], entries: [], status: 'idle' }),
+  addCategory: async (label) => {
+    const created = await api.createCategory(label);
+    set(state => ({ customCategories: [...state.customCategories, created] }));
+    return created;
+  },
+
+  renameCategory: async (id, label) => {
+    const updated = await api.updateCategory(id, label);
+    set(state => ({
+      customCategories: state.customCategories.map(c => (c.id === id ? updated : c)),
+    }));
+  },
+
+  removeCategory: async (id) => {
+    await api.deleteCategory(id);
+    set(state => ({
+      customCategories: state.customCategories.filter(c => c.id !== id),
+    }));
+  },
+
+  reset: () => set({ versions: [], entries: [], customCategories: [], status: 'idle' }),
 }));

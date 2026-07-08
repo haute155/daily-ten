@@ -1,6 +1,6 @@
 'use client';
 
-import { ChecklistItem, ChecklistVersion, DailyEntry } from '@/lib/types';
+import { ChecklistItem, ChecklistVersion, CustomCategory, DailyEntry } from '@/lib/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 const TOKEN_KEY = 'daily-ten-token';
@@ -114,4 +114,16 @@ export const api = {
     date: string,
     payload: { checkedItemIds: string[]; note: string; checklistVersionId?: string }
   ) => request<DailyEntry>(`/entries/${date}`, { method: 'PUT', body: JSON.stringify(payload) }),
+
+  // ── custom categories ──
+  getCategories: () => request<CustomCategory[]>('/categories'),
+
+  createCategory: (label: string) =>
+    request<CustomCategory>('/categories', { method: 'POST', body: JSON.stringify({ label }) }),
+
+  updateCategory: (id: string, label: string) =>
+    request<CustomCategory>(`/categories/${id}`, { method: 'PATCH', body: JSON.stringify({ label }) }),
+
+  deleteCategory: (id: string) =>
+    request<{ ok: boolean }>(`/categories/${id}`, { method: 'DELETE' }),
 };

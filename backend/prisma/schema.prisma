@@ -14,10 +14,24 @@ model User {
   passwordHash String   @map("password_hash")
   createdAt    DateTime @default(now()) @map("created_at")
 
-  versions ChecklistVersion[]
-  entries  DailyEntry[]
+  versions   ChecklistVersion[]
+  entries    DailyEntry[]
+  categories CustomCategory[]
 
   @@map("users")
+}
+
+/// 사용자 정의 카테고리 — 기본 6종(운동/수면/학습/힐링/식습관/업무)은 코드 상수, 여긴 사용자가 추가한 것만
+model CustomCategory {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  label     String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, label])
+  @@map("custom_categories")
 }
 
 model ChecklistVersion {

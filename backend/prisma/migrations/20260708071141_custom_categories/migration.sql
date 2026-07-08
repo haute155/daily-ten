@@ -1,0 +1,15 @@
+-- CreateTable
+CREATE TABLE "custom_categories" (
+    "id" TEXT NOT NULL,
+    "user_id" TEXT NOT NULL,
+    "label" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "custom_categories_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "custom_categories_user_id_label_key" ON "custom_categories"("user_id", "label");
+
+-- AddForeignKey
+ALTER TABLE "custom_categories" ADD CONSTRAINT "custom_categories_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

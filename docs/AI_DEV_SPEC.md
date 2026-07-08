@@ -39,7 +39,7 @@
 |---|---|
 | 6개 페이지 + /login | ✅ 미로그인 시 /login 리다이렉트 (AppGate) |
 | 인증 | ✅ 이메일+비밀번호, bcrypt(12r), JWT(7d) 직접 구현. signup/login/me |
-| 데이터 API | ✅ GET/POST /versions, GET /entries, PUT /entries/:date (사용자 스코프) |
+| 데이터 API | ✅ GET/POST /versions, GET /entries, PUT /entries/:date, /categories CRUD (사용자 스코프) |
 | 도메인 규칙 서버 보장 | ✅ 가중치 합 10 검증, 점수 서버 재계산(클라 점수 무시), 오늘 기록 시 새 버전 내일부터, 기록-버전 링크 불변, 하루 1엔트리(unique userId+date) |
 | 프론트 상태 | ✅ zustand 인메모리 + 서버 fetch (`loadAll`). localStorage에는 JWT 토큰만 |
 | 프론트 도메인 로직 | ✅ `frontend/src/lib/domain/` 유지 (실시간 점수 미리보기, diff 요약 생성) + 테스트 22개 |

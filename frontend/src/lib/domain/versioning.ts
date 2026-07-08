@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { ChecklistItem, ChecklistVersion, DailyEntry, VersionDiff } from '@/lib/types';
+import { ChecklistItem, ChecklistVersion, CustomCategory, DailyEntry, VersionDiff } from '@/lib/types';
 import { getCategoryLabel } from './categories';
 
 /**
@@ -34,7 +34,8 @@ export function resolveLatestVersion(versions: ChecklistVersion[]): ChecklistVer
 
 export function computeVersionDiff(
   prev: ChecklistVersion | null,
-  next: ChecklistVersion
+  next: ChecklistVersion,
+  customCategories?: CustomCategory[]
 ): VersionDiff {
   const changes: VersionDiff['changes'] = [];
 
@@ -108,7 +109,7 @@ export function computeVersionDiff(
           itemId: id,
           before: prevItem.category,
           after: item.category,
-          description: `"${item.label}" 카테고리 ${getCategoryLabel(prevItem.category)} → ${getCategoryLabel(item.category)}`,
+          description: `"${item.label}" 카테고리 ${getCategoryLabel(prevItem.category, customCategories)} → ${getCategoryLabel(item.category, customCategories)}`,
         });
       }
     }
@@ -125,7 +126,8 @@ export function computeVersionDiff(
 export function createNewVersion(
   current: ChecklistVersion | null,
   newItems: ChecklistItem[],
-  effectiveFrom: string = dayjs().format('YYYY-MM-DD')
+  effectiveFrom: string = dayjs().format('YYYY-MM-DD'),
+  customCategories?: CustomCategory[]
 ): { version: ChecklistVersion; diff: VersionDiff } {
   const nextNumber = (current?.versionNumber ?? 0) + 1;
   const newVersionId = `version-${nextNumber}-${Date.now()}`;
@@ -142,7 +144,7 @@ export function createNewVersion(
     createdAt: new Date().toISOString(),
   };
 
-  const diff = computeVersionDiff(current, newVersion);
+  const diff = computeVersionDiff(current, newVersion, customCategories);
 
   // Build summary from diff
   const summaryParts = diff.changes.map(c => c.description);
