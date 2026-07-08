@@ -7,7 +7,7 @@ import { ChecklistItem, CustomCategory } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { GripVertical, Trash2, Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { CATEGORIES, UNCATEGORIZED_LABEL, suggestCategory } from '@/lib/domain/categories';
+import { UNCATEGORIZED_LABEL, suggestCategoryId } from '@/lib/domain/categories';
 
 const NEW_CATEGORY_VALUE = '__new__';
 
@@ -105,10 +105,10 @@ export function ChecklistItemCard({
           onChange={e => onChange(item.id, { label: e.target.value })}
           onFocus={e => e.target.select()}
           onBlur={e => {
-            // 카테고리가 비어 있으면 이름 키워드로 자동 제안 (사용자가 언제든 변경 가능)
+            // 카테고리가 비어 있으면 이름 키워드로 자동 제안 — 사용자가 가진 카테고리에 한해서
             if (!item.category) {
-              const suggested = suggestCategory(e.target.value);
-              if (suggested) onChange(item.id, { category: suggested });
+              const suggestedId = suggestCategoryId(e.target.value, customCategories);
+              if (suggestedId) onChange(item.id, { category: suggestedId });
             }
           }}
           className="h-9 text-sm border-neutral-200 focus:ring-brand/30"
@@ -133,11 +133,6 @@ export function ChecklistItemCard({
           aria-label={`${item.label} 카테고리`}
         >
           <option value="">{UNCATEGORIZED_LABEL}</option>
-          {CATEGORIES.map(c => (
-            <option key={c.key} value={c.key}>
-              {c.label}
-            </option>
-          ))}
           {customCategories.map(c => (
             <option key={c.id} value={c.id}>
               {c.label}

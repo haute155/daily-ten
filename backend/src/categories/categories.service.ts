@@ -6,16 +6,8 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CategoryDto } from './dto/category.dto';
 
-/** 기본 카테고리 라벨 — 커스텀이 기본과 겹치지 않게 막는다 */
-const DEFAULT_LABELS = [
-  '운동',
-  '수면',
-  '학습',
-  '힐링',
-  '식습관',
-  '업무',
-  '미분류',
-];
+/** 예약어 — 시스템이 폴백 표시로 쓰는 이름만 막는다 */
+const RESERVED_LABELS = ['미분류'];
 
 @Injectable()
 export class CategoriesService {
@@ -30,8 +22,8 @@ export class CategoriesService {
 
   async create(userId: string, dto: CategoryDto) {
     const label = dto.label.trim();
-    if (DEFAULT_LABELS.includes(label)) {
-      throw new ConflictException('기본 카테고리와 같은 이름은 쓸 수 없습니다');
+    if (RESERVED_LABELS.includes(label)) {
+      throw new ConflictException('사용할 수 없는 이름입니다');
     }
     const existing = await this.prisma.customCategory.findUnique({
       where: { userId_label: { userId, label } },
@@ -48,8 +40,8 @@ export class CategoriesService {
       where: { id, userId },
     });
     if (!category) throw new NotFoundException('카테고리를 찾을 수 없습니다');
-    if (DEFAULT_LABELS.includes(label)) {
-      throw new ConflictException('기본 카테고리와 같은 이름은 쓸 수 없습니다');
+    if (RESERVED_LABELS.includes(label)) {
+      throw new ConflictException('사용할 수 없는 이름입니다');
     }
     return this.prisma.customCategory.update({
       where: { id },

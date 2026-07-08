@@ -9,7 +9,6 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { useAppStore } from '@/store/appStore';
-import { CATEGORIES } from '@/lib/domain/categories';
 import { Plus, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -120,7 +119,7 @@ export function CategoryManagerDialog({ open, onOpenChange, onCreated }: Categor
         </div>
 
         {/* 내 카테고리 */}
-        <div className="px-5 pb-2">
+        <div className="px-5 pb-5">
           <p className="text-[11px] font-semibold text-neutral-400 mb-1">내 카테고리</p>
           {customCategories.length > 0 ? (
             <ul className="flex flex-col -mx-2">
@@ -167,19 +166,6 @@ export function CategoryManagerDialog({ open, onOpenChange, onCreated }: Categor
           ) : (
             <p className="text-xs text-neutral-400 py-2">아직 없어요. 위에서 추가해 보세요.</p>
           )}
-        </div>
-
-        {/* 기본 카테고리 */}
-        <div className="px-5 pt-2 pb-5 border-t border-neutral-100 mt-2">
-          <p className="text-[11px] font-semibold text-neutral-400 mt-2 mb-1.5">기본 카테고리</p>
-          <div className="flex flex-wrap gap-1.5">
-            {CATEGORIES.map(c => (
-              <span key={c.key} className="text-xs px-2 py-1 rounded-sm bg-neutral-100 text-neutral-500">
-                {c.label}
-              </span>
-            ))}
-          </div>
-          <p className="text-[11px] text-neutral-400 mt-2">기본 카테고리는 자동 분류의 기준이라 바꿀 수 없어요.</p>
         </div>
       </DialogContent>
     </Dialog>

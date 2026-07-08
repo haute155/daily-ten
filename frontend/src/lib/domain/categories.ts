@@ -1,5 +1,10 @@
 import { CategoryKey, CustomCategory } from '@/lib/types';
 
+/**
+ * 가입 시 시드되는 기본 카테고리 정의.
+ * 카테고리는 전부 사용자 소유(DB 행)이며 자유롭게 수정·삭제할 수 있다 —
+ * 이 상수는 (1) 키워드 자동 분류의 라벨 매핑 (2) 옛 데이터(키 저장 방식)의 폴백 해석에만 쓰인다.
+ */
 export const CATEGORIES: Array<{ key: CategoryKey; label: string }> = [
   { key: 'exercise', label: '운동' },
   { key: 'sleep', label: '수면' },
@@ -15,11 +20,27 @@ export const CATEGORY_LABELS: Record<CategoryKey, string> = Object.fromEntries(
 
 export const UNCATEGORIZED_LABEL = '미분류';
 
-/** 기본 키 → 기본 라벨, 커스텀 id → 커스텀 라벨, 그 외(삭제된 커스텀 포함) → 미분류 */
+/** 커스텀 id → 라벨, (레거시) 기본 키 → 기본 라벨, 그 외(삭제된 것 포함) → 미분류 */
 export function getCategoryLabel(category?: string, customCategories?: CustomCategory[]): string {
   if (!category) return UNCATEGORIZED_LABEL;
+  const custom = customCategories?.find(c => c.id === category);
+  if (custom) return custom.label;
   if (category in CATEGORY_LABELS) return CATEGORY_LABELS[category as CategoryKey];
-  return customCategories?.find(c => c.id === category)?.label ?? UNCATEGORIZED_LABEL;
+  return UNCATEGORIZED_LABEL;
+}
+
+/**
+ * 키워드 자동 분류 → 사용자가 실제로 가진 카테고리의 id로 변환.
+ * 해당 라벨의 카테고리를 지웠다면 제안하지 않는다 (undefined).
+ */
+export function suggestCategoryId(
+  label: string,
+  customCategories: CustomCategory[]
+): string | undefined {
+  const key = suggestCategory(label);
+  if (!key) return undefined;
+  const targetLabel = CATEGORY_LABELS[key];
+  return customCategories.find(c => c.label === targetLabel)?.id;
 }
 
 /**

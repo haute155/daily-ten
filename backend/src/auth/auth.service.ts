@@ -10,6 +10,9 @@ import { LoginDto, SignupDto } from './dto/auth.dto';
 
 const BCRYPT_ROUNDS = 12;
 
+/** 가입 시 심어주는 기본 카테고리 — 시드일 뿐, 이후엔 자유롭게 수정·삭제 가능 */
+const SEED_CATEGORIES = ['운동', '수면', '학습', '힐링', '식습관', '업무'];
+
 export interface JwtPayload {
   sub: string; // user id
   email: string;
@@ -32,7 +35,13 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
     const user = await this.prisma.user.create({
-      data: { email: dto.email, passwordHash },
+      data: {
+        email: dto.email,
+        passwordHash,
+        categories: {
+          createMany: { data: SEED_CATEGORIES.map((label) => ({ label })) },
+        },
+      },
     });
 
     return this.issueToken(user.id, user.email);

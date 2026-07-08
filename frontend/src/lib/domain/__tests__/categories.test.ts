@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { suggestCategory, getCategoryLabel } from '@/lib/domain/categories';
+import { suggestCategory, suggestCategoryId, getCategoryLabel } from '@/lib/domain/categories';
 import { computeVersionDiff } from '@/lib/domain/versioning';
 import { makeItem, makeVersion } from './helpers';
 
@@ -37,9 +37,30 @@ describe('getCategoryLabel', () => {
     expect(getCategoryLabel('deleted-cat-id')).toBe('미분류');
   });
 
-  it('기본 키는 커스텀 목록보다 우선한다', () => {
-    const custom = [{ id: 'exercise', label: '이상한 덮어쓰기' }];
-    expect(getCategoryLabel('exercise', custom)).toBe('운동');
+  it('사용자 카테고리가 레거시 기본 키 폴백보다 우선한다', () => {
+    const custom = [{ id: 'exercise', label: '내가 바꾼 이름' }];
+    expect(getCategoryLabel('exercise', custom)).toBe('내가 바꾼 이름');
+  });
+
+  it('레거시 기본 키는 사용자 목록에 없으면 상수 라벨로 폴백한다', () => {
+    expect(getCategoryLabel('exercise', [])).toBe('운동');
+  });
+});
+
+describe('suggestCategoryId — 사용자 보유 카테고리 기준 제안', () => {
+  const mine = [
+    { id: 'cat-ex', label: '운동' },
+    { id: 'cat-work', label: '업무' },
+  ];
+
+  it('키워드 매칭 라벨을 사용자가 갖고 있으면 그 id를 반환한다', () => {
+    expect(suggestCategoryId('아침 헬스', mine)).toBe('cat-ex');
+    expect(suggestCategoryId('이메일 정리', mine)).toBe('cat-work');
+  });
+
+  it('해당 라벨의 카테고리를 지웠으면 제안하지 않는다', () => {
+    expect(suggestCategoryId('11시 취침', mine)).toBeUndefined(); // 수면 없음
+    expect(suggestCategoryId('아침 헬스', [])).toBeUndefined();
   });
 });
 
