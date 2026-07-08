@@ -7,9 +7,7 @@ import { ChecklistItem, CustomCategory } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { GripVertical, Trash2, Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { UNCATEGORIZED_LABEL, suggestCategoryId } from '@/lib/domain/categories';
-
-const NEW_CATEGORY_VALUE = '__new__';
+import { UNCATEGORIZED_LABEL } from '@/lib/domain/categories';
 
 interface ChecklistItemCardProps {
   item: ChecklistItem;
@@ -19,8 +17,6 @@ interface ChecklistItemCardProps {
   onChange: (id: string, changes: Partial<ChecklistItem>) => void;
   onRemove: (id: string) => void;
   onMoveTo: (id: string, toIndex: number) => void;
-  /** "새 카테고리…" 선택 시 카테고리 관리 팝업 열기 (생성되면 이 항목에 지정) */
-  onRequestNewCategory: (itemId: string) => void;
 }
 
 export function ChecklistItemCard({
@@ -31,7 +27,6 @@ export function ChecklistItemCard({
   onChange,
   onRemove,
   onMoveTo,
-  onRequestNewCategory,
 }: ChecklistItemCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
@@ -104,13 +99,6 @@ export function ChecklistItemCard({
           value={item.label}
           onChange={e => onChange(item.id, { label: e.target.value })}
           onFocus={e => e.target.select()}
-          onBlur={e => {
-            // 카테고리가 비어 있으면 이름 키워드로 자동 제안 — 사용자가 가진 카테고리에 한해서
-            if (!item.category) {
-              const suggestedId = suggestCategoryId(e.target.value, customCategories);
-              if (suggestedId) onChange(item.id, { category: suggestedId });
-            }
-          }}
           className="h-9 text-sm border-neutral-200 focus:ring-brand/30"
           placeholder="항목 이름"
           aria-label="항목 이름"
@@ -118,14 +106,7 @@ export function ChecklistItemCard({
         />
         <select
           value={item.category ?? ''}
-          onChange={e => {
-            const value = e.target.value;
-            if (value === NEW_CATEGORY_VALUE) {
-              onRequestNewCategory(item.id);
-              return;
-            }
-            onChange(item.id, { category: value || undefined });
-          }}
+          onChange={e => onChange(item.id, { category: e.target.value || undefined })}
           className={cn(
             'h-7 w-fit text-xs rounded-md border border-neutral-200 bg-white px-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/40',
             item.category ? 'text-brand font-medium' : 'text-neutral-400'
@@ -138,7 +119,6 @@ export function ChecklistItemCard({
               {c.label}
             </option>
           ))}
-          <option value={NEW_CATEGORY_VALUE}>＋ 새 카테고리…</option>
         </select>
       </div>
 

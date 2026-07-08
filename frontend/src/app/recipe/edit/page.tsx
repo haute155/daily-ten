@@ -34,14 +34,7 @@ function RecipeEditContent() {
     handleSave,
   } = useSettings();
 
-  // 카테고리 관리 팝업 — 셀렉트의 "새 카테고리…"로 열리면 생성 시 그 항목에 자동 지정
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
-  const [pendingItemId, setPendingItemId] = useState<string | null>(null);
-
-  const handleRequestNewCategory = (itemId: string) => {
-    setPendingItemId(itemId);
-    setCategoryDialogOpen(true);
-  };
 
   const onSave = async () => {
     const success = await handleSave();
@@ -93,21 +86,11 @@ function RecipeEditContent() {
           onItemRemove={removeItem}
           onItemMoveTo={moveItemTo}
           onItemReorder={reorderItems}
-          onRequestNewCategory={handleRequestNewCategory}
           onSave={onSave}
         />
       </div>
 
-      <CategoryManagerDialog
-        open={categoryDialogOpen}
-        onOpenChange={open => {
-          setCategoryDialogOpen(open);
-          if (!open) setPendingItemId(null);
-        }}
-        onCreated={id => {
-          if (pendingItemId) updateItem(pendingItemId, { category: id });
-        }}
-      />
+      <CategoryManagerDialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen} />
     </div>
   );
 }
