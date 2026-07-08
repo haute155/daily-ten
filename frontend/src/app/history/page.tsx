@@ -116,7 +116,7 @@ function HistoryPageContent() {
             <Button
               variant="outline"
               className="w-full h-10 mt-3 rounded-md text-sm"
-              onClick={() => router.push(`/history/${selectedDate}`)}
+              onClick={() => router.push(`/history/${selectedDate}?edit=1`)}
             >
               <Pencil size={13} className="mr-1.5" aria-hidden="true" />
               수정하기

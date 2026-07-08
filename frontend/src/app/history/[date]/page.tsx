@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
 import { useHistoryEntry } from '@/hooks/useHistory';
@@ -27,11 +27,13 @@ export default function HistoryDatePage() {
 function HistoryDateContent() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const date = params.date as string;
 
   const { entry, version, updateEntryByDate } = useHistoryEntry(date);
 
-  const [isEditing, setIsEditing] = useState(false);
+  // 미리보기 패널의 [수정하기]로 진입하면 (?edit=1) 바로 수정 모드로 시작
+  const [isEditing, setIsEditing] = useState(searchParams.get('edit') === '1' && !!entry);
   const [checkedItemIds, setCheckedItemIds] = useState<string[]>(
     entry?.checkedItemIds ?? []
   );
