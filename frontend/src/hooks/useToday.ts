@@ -38,6 +38,7 @@ export function useToday() {
   // 마지막 변경 내용과 타이머 — 언마운트 시에도 유실 없이 전송하기 위해 ref로 유지
   const pendingRef = useRef<{ ids: string[]; note: string } | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const flush = async () => {
     const pending = pendingRef.current;
@@ -47,7 +48,14 @@ export function useToday() {
     try {
       await useAppStore.getState().saveTodayEntry(pending.ids, pending.note);
       // flush 도중 새 변경이 쌓였으면 saved 표시를 덮지 않는다
-      if (!pendingRef.current) setSaveState('saved');
+      if (!pendingRef.current) {
+        setSaveState('saved');
+        // "저장됨"은 5초만 보여주고 사라진다
+        if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+        hideTimerRef.current = setTimeout(() => {
+          setSaveState(current => (current === 'saved' ? 'idle' : current));
+        }, 5000);
+      }
     } catch (e) {
       setSaveState('error');
       toast.error(e instanceof Error ? e.message : '저장에 실패했습니다');
@@ -77,6 +85,7 @@ export function useToday() {
     return () => {
       window.removeEventListener('pagehide', onPageHide);
       if (timerRef.current) clearTimeout(timerRef.current);
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
       const pending = pendingRef.current;
       if (pending) {
         pendingRef.current = null;

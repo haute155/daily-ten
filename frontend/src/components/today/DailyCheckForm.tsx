@@ -2,7 +2,7 @@
 
 import { ChecklistVersion } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { Check, CloudUpload } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import type { SaveState } from '@/hooks/useToday';
 
@@ -85,25 +85,15 @@ export function DailyCheckForm({
         />
       </div>
 
-      {/* 자동 저장 상태 — 별도 저장 버튼 없음 */}
-      <div
-        className="flex items-center justify-end gap-1.5 px-1 h-5 text-xs text-neutral-400"
-        aria-live="polite"
-      >
-        {saveState === 'saving' && (
-          <>
-            <CloudUpload size={12} className="animate-pulse" aria-hidden="true" />
-            저장 중…
-          </>
-        )}
+      {/* 자동 저장 상태 — 저장 성공 시 초록 "저장됨"이 5초간 표시됐다 사라진다 */}
+      <div className="flex items-center justify-end gap-1.5 px-1 h-5 text-xs" aria-live="polite">
         {saveState === 'saved' && (
-          <>
-            <Check size={12} className="text-brand" aria-hidden="true" />
-            자동 저장됨
-          </>
+          <span className="inline-flex items-center gap-1 text-green-600 font-medium">
+            <Check size={12} aria-hidden="true" />
+            저장됨
+          </span>
         )}
         {saveState === 'error' && <span className="text-low">저장 실패 — 다시 시도해 주세요</span>}
-        {saveState === 'idle' && '체크하면 자동으로 저장돼요'}
       </div>
     </div>
   );
