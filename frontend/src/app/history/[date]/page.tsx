@@ -36,17 +36,16 @@ function HistoryDateContent() {
   const isToday = date === dayjs().format('YYYY-MM-DD');
   const isFuture = dayjs(date).isAfter(dayjs(), 'day');
 
-  // 기본 레시피: 기존 기록의 버전 > 그 날짜에 적용되던 버전 > 가장 오래된 버전
-  // (첫 레시피 생성 이전 날짜도 레시피를 골라 입력할 수 있게)
+  // 기본 레시피:
+  // - 기존 기록 수정 → 그 기록의 버전 (저장만 눌러도 링크가 바뀌는 사고 방지)
+  // - 소급 신규 입력 → 현재 적용 중인 레시피 (사용자의 기본 멘탈 모델) > 가장 오래된 버전
+  const currentActiveVersion = resolveActiveVersion(versions, dayjs().format('YYYY-MM-DD'));
   const oldestVersion =
     versions.length > 0
       ? versions.reduce((a, b) => (b.versionNumber < a.versionNumber ? b : a))
       : null;
   const defaultVersionId =
-    entry?.checklistVersionId ??
-    resolveActiveVersion(versions, date)?.id ??
-    oldestVersion?.id ??
-    null;
+    entry?.checklistVersionId ?? currentActiveVersion?.id ?? oldestVersion?.id ?? null;
 
   // 과거 미기록 날짜도 "지금이라도 입력" 가능 (당시 적용 가능한 레시피가 있을 때)
   const canWrite = !isFuture && defaultVersionId !== null;
