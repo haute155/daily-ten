@@ -131,7 +131,7 @@ PRD §5가 원본. 코드에서 지켜야 할 불변식:
 1. **점수**: 서버가 항상 버전 가중치로 재계산한다. 클라이언트가 보낸 score는 무시된다 (ValidationPipe whitelist).
 2. **버전 append-only + draft 흡수**: POST /versions는 트랜잭션으로 [최신 버전 effectiveTo 닫기 → versionNumber+1 생성]을 수행한다. 단, 최신 버전이 draft(연결 기록 0개 && effectiveFrom ≥ clientToday)면 새 버전 대신 그 버전을 덮어쓴다(번호 유지, 이전 버전 effectiveTo 재조정). 기록이 붙은 버전은 불변. 프론트 판정 함수: `isDraftVersion` — draft 흡수 시 diff/changeSummary는 draft가 아닌 "마지막으로 발효된 버전" 기준으로 계산한다 (appStore.updateVersion).
 3. **적용 시점**: 요청의 `clientToday`에 기록이 있으면 `effectiveFrom = clientToday + 1일`. 날짜의 기준은 클라이언트 로컬(타임존은 클라이언트가 안다).
-4. **기록-버전 연결**: PUT /entries/:date는 기존 기록이면 그 기록의 버전으로, 새 기록이면 해당 날짜의 활성 버전(effectiveFrom ≤ date 중 최신)으로 점수를 계산한다.
+4. **기록-버전 연결**: PUT /entries/:date의 버전 결정 우선순위 — ① 사용자가 명시적으로 선택한 레시피(dto.checklistVersionId, 본인 소유 검증) ② 기존 기록의 버전 ③ 해당 날짜의 활성 버전. 과거 미기록 날짜도 레시피를 골라 소급 입력할 수 있다.
 5. **총합 10점**: 서버가 weight 합 ≠ 10이면 400. 프론트도 저장 버튼을 비활성화한다.
 6. **날짜**: 문자열 `YYYY-MM-DD`. 하루 1엔트리 — DB unique(userId, date)로 강제.
 7. **사용자 스코프**: 모든 쿼리는 JWT의 userId로 필터. 다른 사용자 데이터 접근 불가.

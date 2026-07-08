@@ -35,7 +35,7 @@ function SettingsPageContent() {
 
   return (
     <div className="flex flex-col">
-      <PageHeader title="설정" subtitle="계정과 앱을 관리하세요" />
+      <PageHeader title="설정" subtitle="계정과 앱을 관리하세요" settingsLink={false} />
 
       {/* 계정 */}
       <section className="px-4">

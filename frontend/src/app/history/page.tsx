@@ -125,12 +125,21 @@ function HistoryPageContent() {
         ) : (
           <div className="mt-3 pt-3 border-t border-neutral-100">
             <p className="text-sm text-neutral-400">이 날은 기록이 없어요.</p>
-            {selectedDate === today && (
+            {selectedDate === today ? (
               <Button
                 className="w-full h-10 mt-3 rounded-md bg-neutral-900 hover:bg-neutral-700 text-white text-sm"
                 onClick={() => router.push('/today')}
               >
                 오늘 기록하러 가기
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                className="w-full h-10 mt-3 rounded-md text-sm"
+                onClick={() => router.push(`/history/${selectedDate}?edit=1`)}
+              >
+                <Pencil size={13} className="mr-1.5" aria-hidden="true" />
+                지금이라도 입력하기
               </Button>
             )}
           </div>

@@ -19,7 +19,12 @@ interface AppStore {
   // Actions — 서버가 진실의 원천. 응답으로 로컬 상태를 갱신한다
   loadAll: () => Promise<void>;
   saveTodayEntry: (checkedItemIds: string[], note: string) => Promise<void>;
-  updateEntryByDate: (date: string, checkedItemIds: string[], note: string) => Promise<void>;
+  updateEntryByDate: (
+    date: string,
+    checkedItemIds: string[],
+    note: string,
+    checklistVersionId?: string
+  ) => Promise<void>;
   updateVersion: (newItems: ChecklistItem[]) => Promise<void>;
   reset: () => void;
 }
@@ -50,8 +55,8 @@ export const useAppStore = create<AppStore>()((set, get) => ({
     await get().updateEntryByDate(today, checkedItemIds, note);
   },
 
-  updateEntryByDate: async (date, checkedItemIds, note) => {
-    const saved = await api.upsertEntry(date, { checkedItemIds, note });
+  updateEntryByDate: async (date, checkedItemIds, note, checklistVersionId) => {
+    const saved = await api.upsertEntry(date, { checkedItemIds, note, checklistVersionId });
     set(state => ({
       entries: state.entries.some(e => e.date === date)
         ? state.entries.map(e => (e.date === date ? saved : e))

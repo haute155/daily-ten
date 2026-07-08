@@ -68,5 +68,5 @@ export function useHistoryEntry(date: string) {
     ? versions.find(v => v.id === entry.checklistVersionId)
     : null;
 
-  return { entry, version, updateEntryByDate };
+  return { entry, version, versions, updateEntryByDate };
 }

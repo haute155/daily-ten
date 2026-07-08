@@ -110,6 +110,8 @@ export const api = {
 
   getEntries: () => request<DailyEntry[]>('/entries'),
 
-  upsertEntry: (date: string, payload: { checkedItemIds: string[]; note: string }) =>
-    request<DailyEntry>(`/entries/${date}`, { method: 'PUT', body: JSON.stringify(payload) }),
+  upsertEntry: (
+    date: string,
+    payload: { checkedItemIds: string[]; note: string; checklistVersionId?: string }
+  ) => request<DailyEntry>(`/entries/${date}`, { method: 'PUT', body: JSON.stringify(payload) }),
 };
