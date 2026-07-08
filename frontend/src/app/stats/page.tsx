@@ -49,7 +49,7 @@ function StatsPageContent() {
 
   return (
     <div className="flex flex-col">
-      <PageHeader title="통계" subtitle="데이터로 나를 파악하세요" />
+      <PageHeader title="분석" subtitle="데이터로 나를 파악하세요" />
 
       {/* Overview cards */}
       <StatsOverview

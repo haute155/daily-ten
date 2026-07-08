@@ -7,9 +7,9 @@ import { cn } from '@/lib/utils';
 
 const navItems = [
   { href: '/today', label: '오늘', icon: Home },
-  { href: '/settings', label: '레시피', icon: SlidersHorizontal },
   { href: '/history', label: '기록', icon: CalendarDays },
-  { href: '/stats', label: '통계', icon: BarChart2 },
+  { href: '/settings', label: '레시피', icon: SlidersHorizontal },
+  { href: '/stats', label: '분석', icon: BarChart2 },
 ];
 
 export function BottomNav() {
