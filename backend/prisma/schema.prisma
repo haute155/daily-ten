@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  versions ChecklistVersion[]
+  entries  DailyEntry[]
+
+  @@map("users")
+}
+
+model ChecklistVersion {
+  id            String   @id
+  userId        String   @map("user_id")
+  versionNumber Int      @map("version_number")
+  title         String
+  /// ChecklistItem[] — 항목 구조는 프론트 도메인 타입과 동일한 JSON
+  items         Json
+  totalScore    Int      @map("total_score")
+  changeSummary String   @default("") @map("change_summary")
+  effectiveFrom String   @map("effective_from") // YYYY-MM-DD
+  effectiveTo   String?  @map("effective_to") // YYYY-MM-DD, null = 현재
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries DailyEntry[]
+
+  @@unique([userId, versionNumber])
+  @@map("checklist_versions")
+}
+
+model DailyEntry {
+  id                 String   @id
+  userId             String   @map("user_id")
+  date               String // YYYY-MM-DD
+  checklistVersionId String   @map("checklist_version_id")
+  checkedItemIds     Json     @map("checked_item_ids")
+  score              Float
+  note               String   @default("")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  version ChecklistVersion @relation(fields: [checklistVersionId], references: [id])
+
+  @@unique([userId, date])
+  @@map("daily_entries")
+}

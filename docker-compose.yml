@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: daily-ten-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dailyten
+      POSTGRES_PASSWORD: dailyten
+      POSTGRES_DB: dailyten
+    ports:
+      - '5433:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:
