@@ -55,7 +55,7 @@
 | 구분 | 선택 | 비고 |
 |---|---|---|
 | 도구 관리 | **mise** (node 24, pnpm 10), **pnpm workspace** (frontend, backend) | 루트 `package.json`이 공통 스크립트 소유 |
-| 프론트 | Next.js **16.1.6** (App Router), React **19.2.3** (Compiler), Tailwind 4, shadcn/ui, zustand 5(인메모리), dayjs, recharts, sonner, vitest | |
+| 프론트 | Next.js **16.1.6** (App Router), React **19.2.3** (Compiler), Tailwind 4, shadcn/ui, zustand 5(인메모리), dayjs, recharts, sonner, vitest, **dnd-kit**(설정 항목 드래그 정렬 — 터치 지원 필요로 추가) | |
 | 백엔드 | **NestJS 11**, **Prisma 7** (driver adapter `@prisma/adapter-pg`, `moduleFormat=cjs`), class-validator, `@nestjs/jwt`, bcrypt | `.env`로 설정 분리 (`backend/.env.example`) |
 | DB | PostgreSQL 17 — 로컬은 `docker compose up -d` (포트 **5433**) | 스키마 변경은 반드시 `prisma migrate dev`로 |
 | 언어 | TypeScript 5 전 영역, `any` 금지 | |
@@ -179,6 +179,7 @@ diff 설명 문구는 한국어 문장으로 생성한다 (예: "운동 가중�
 ### P1 — 다듬기
 
 - [ ] 실사용 dogfooding에서 나온 UX 마찰 지점 반영
+- [ ] 버전 히스토리 표시: 한 번도 활성화되지 않은 버전(적용 예정 상태에서 재교체됨)이 "07.08 ~ 07.07"처럼 기간이 뒤집혀 보임 — "적용되지 않음" 표기로 다듬기
 - [ ] 인사이트 문구 데이터 부족 처리: 기록 1개일 때 "지난달보다 평균 +7점 향상" 같은 과장 문구가 나옴 (`getInsightSummary`가 prev30 없을 때 개선폭을 그대로 계산). 최소 기록 수 조건 필요
 - [ ] 백엔드 단위/e2e 테스트: 현재 Nest 스캐폴드 기본 테스트뿐. versions/entries service의 규칙(적용 시점, 재계산)에 대한 테스트 작성
 - [ ] JWT 만료 UX: 만료 시 401 → /login 이동은 되나, 리프레시 토큰 없음 (7일마다 재로그인). 필요해지면 refresh 흐름 도입
