@@ -9,7 +9,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { useAppStore } from '@/store/appStore';
-import { Plus, Trash2 } from 'lucide-react';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CategoryManagerDialogProps {
@@ -25,11 +25,26 @@ export function CategoryManagerDialog({ open, onOpenChange, onCreated }: Categor
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editDraft, setEditDraft] = useState('');
 
   const resetLocal = () => {
     setNewLabel('');
     setError(null);
     setConfirmingId(null);
+    setEditingId(null);
+  };
+
+  const handleRename = async (id: string) => {
+    const label = editDraft.trim();
+    if (!label) return;
+    setError(null);
+    try {
+      await useAppStore.getState().renameCategory(id, label);
+      setEditingId(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '이름을 바꾸지 못했습니다');
+    }
   };
 
   const handleOpenChange = (next: boolean) => {
@@ -148,9 +163,56 @@ export function CategoryManagerDialog({ open, onOpenChange, onCreated }: Categor
                       삭제
                     </button>
                   </li>
+                ) : editingId === c.id ? (
+                  <li key={c.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-neutral-50">
+                    <input
+                      type="text"
+                      value={editDraft}
+                      onChange={e => setEditDraft(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          void handleRename(c.id);
+                        }
+                        if (e.key === 'Escape') setEditingId(null);
+                      }}
+                      maxLength={10}
+                      autoFocus
+                      className="flex-1 min-w-0 h-8 text-sm rounded-md border border-brand/40 bg-white px-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
+                      aria-label={`${c.label} 새 이름`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setEditingId(null)}
+                      className="h-8 px-2.5 rounded-md text-xs font-medium text-neutral-500 hover:bg-neutral-100"
+                    >
+                      취소
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleRename(c.id)}
+                      disabled={!editDraft.trim() || editDraft.trim() === c.label}
+                      className="h-8 px-2.5 rounded-md text-xs font-semibold bg-neutral-900 text-white hover:bg-neutral-700 disabled:opacity-40"
+                    >
+                      저장
+                    </button>
+                  </li>
                 ) : (
-                  <li key={c.id} className="flex items-center gap-2 px-2 py-1">
+                  <li key={c.id} className="flex items-center gap-1 px-2 py-1">
                     <span className="flex-1 text-sm text-neutral-800 py-1.5">{c.label}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingId(c.id);
+                        setEditDraft(c.label);
+                        setConfirmingId(null);
+                        setError(null);
+                      }}
+                      className="w-8 h-8 rounded-md flex items-center justify-center text-neutral-300 hover:text-neutral-700 hover:bg-neutral-100 transition-colors"
+                      aria-label={`${c.label} 이름 변경`}
+                    >
+                      <Pencil size={13} />
+                    </button>
                     <button
                       type="button"
                       onClick={() => setConfirmingId(c.id)}

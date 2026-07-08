@@ -43,6 +43,12 @@ export class CategoriesService {
     if (RESERVED_LABELS.includes(label)) {
       throw new ConflictException('사용할 수 없는 이름입니다');
     }
+    const duplicate = await this.prisma.customCategory.findUnique({
+      where: { userId_label: { userId, label } },
+    });
+    if (duplicate && duplicate.id !== id) {
+      throw new ConflictException('이미 있는 카테고리입니다');
+    }
     return this.prisma.customCategory.update({
       where: { id },
       data: { label },
