@@ -43,7 +43,7 @@ function TodayPageContent() {
       <div className="flex flex-col items-center justify-center gap-4 px-6 pt-24 pb-4 text-center">
         <Settings size={32} className="text-neutral-300" aria-hidden="true" />
         <div>
-          <h1 className="text-lg font-bold text-neutral-900">아직 체크리스트가 없어요</h1>
+          <h1 className="text-lg font-bold text-neutral-900">아직 텐 레시피가 없어요</h1>
           <p className="text-sm text-neutral-500 mt-1">
             나만의 점수 시스템을 먼저 설계해 주세요. 항목과 가중치의 합이 10점이 되면 시작할 수 있어요.
           </p>
@@ -52,7 +52,7 @@ function TodayPageContent() {
           href="/settings"
           className="h-12 px-6 inline-flex items-center rounded-md bg-neutral-900 hover:bg-neutral-700 text-white text-base font-semibold"
         >
-          체크리스트 만들기
+          텐 레시피 만들기
         </Link>
       </div>
     );

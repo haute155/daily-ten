@@ -2,12 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Settings, CalendarDays, BarChart2 } from 'lucide-react';
+import { Home, SlidersHorizontal, CalendarDays, BarChart2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { href: '/today', label: '오늘', icon: Home },
-  { href: '/settings', label: '설정', icon: Settings },
+  { href: '/settings', label: '레시피', icon: SlidersHorizontal },
   { href: '/history', label: '기록', icon: CalendarDays },
   { href: '/stats', label: '통계', icon: BarChart2 },
 ];

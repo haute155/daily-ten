@@ -96,7 +96,7 @@ export class VersionsService {
           id: randomUUID(),
           userId,
           versionNumber,
-          title: dto.title ?? `v${versionNumber} 루틴`,
+          title: dto.title ?? `텐 레시피 v${versionNumber}`,
           items: dto.items.map((item, idx) => ({
             ...item,
             order: idx,

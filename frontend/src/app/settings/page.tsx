@@ -77,8 +77,8 @@ function SettingsPageContent() {
   return (
     <div className="flex flex-col">
       <PageHeader
-        title="설정"
-        subtitle="나만의 채점 시스템을 설계하세요"
+        title="텐 레시피"
+        subtitle="나만의 10점 레시피를 설계하세요"
       />
 
       <div className="px-4 mb-4">
@@ -123,7 +123,7 @@ function SettingsPageContent() {
           </div>
         ) : (
           <div className="p-3 rounded-md bg-neutral-50 border border-neutral-200 mb-4">
-            <p className="text-sm font-semibold text-neutral-700">첫 체크리스트를 만들어 보세요</p>
+            <p className="text-sm font-semibold text-neutral-700">첫 텐 레시피를 만들어 보세요</p>
             <p className="text-xs text-neutral-500 mt-1">
               항목을 추가하고 가중치 합이 10점이 되면 저장할 수 있어요.
             </p>
@@ -135,7 +135,7 @@ function SettingsPageContent() {
           className="w-full h-12 text-base font-semibold rounded-lg bg-neutral-900 hover:bg-neutral-700 text-white shadow-sm"
         >
           <SlidersHorizontal size={16} className="mr-1.5" aria-hidden="true" />
-          체크리스트 편집
+          레시피 편집
         </Button>
       </div>
 
@@ -175,7 +175,7 @@ function SettingsPageContent() {
       <Sheet open={isEditorOpen} onOpenChange={onSheetOpenChange}>
         <SheetContent side="bottom" className="h-[85vh] max-h-[85vh]">
           <SheetHeader>
-            <SheetTitle>체크리스트 편집</SheetTitle>
+            <SheetTitle>레시피 편집</SheetTitle>
             <SheetDescription>
               {hasTodayEntry
                 ? '변경사항은 내일부터 적용됩니다. 적용 전에는 몇 번을 고쳐도 새 버전이 생기지 않아요.'

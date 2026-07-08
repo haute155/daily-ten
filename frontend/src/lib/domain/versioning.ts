@@ -133,7 +133,7 @@ export function createNewVersion(
   const newVersion: ChecklistVersion = {
     id: newVersionId,
     versionNumber: nextNumber,
-    title: `v${nextNumber} 루틴`,
+    title: `텐 레시피 v${nextNumber}`,
     items: newItems.map((item, idx) => ({ ...item, order: idx })),
     totalScore: newItems.reduce((sum, item) => sum + item.weight, 0),
     changeSummary: '',
