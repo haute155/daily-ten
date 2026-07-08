@@ -53,7 +53,7 @@ export function useStats() {
       dayjs(e.date).isAfter(dayjs().subtract(31, 'day'))
     );
 
-    const freq = new Map<string, { label: string; count: number; total: number }>();
+    const freq = new Map<string, { id: string; label: string; count: number; total: number }>();
 
     last30.forEach(entry => {
       const version = versions.find(v => v.id === entry.checklistVersionId);
@@ -61,7 +61,7 @@ export function useStats() {
 
       version.items.forEach(item => {
         if (!freq.has(item.id)) {
-          freq.set(item.id, { label: item.label, count: 0, total: last30.length });
+          freq.set(item.id, { id: item.id, label: item.label, count: 0, total: last30.length });
         }
         if (entry.checkedItemIds.includes(item.id)) {
           freq.get(item.id)!.count++;

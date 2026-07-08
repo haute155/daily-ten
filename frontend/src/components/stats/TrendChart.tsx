@@ -111,14 +111,14 @@ export function WeeklyBarChart({ data }: WeeklyBarChartProps) {
 }
 
 interface ItemFrequencyChartProps {
-  data: { label: string; rate: number }[];
+  data: { id: string; label: string; rate: number }[];
 }
 
 export function ItemFrequencyChart({ data }: ItemFrequencyChartProps) {
   return (
     <div className="flex flex-col gap-2">
-      {data.map(({ label, rate }) => (
-        <div key={label} className="flex items-center gap-2">
+      {data.map(({ id, label, rate }) => (
+        <div key={id} className="flex items-center gap-2">
           <span className="text-xs text-neutral-600 w-16 flex-shrink-0 truncate">{label}</span>
           <div className="flex-1 h-5 bg-neutral-100 rounded-full overflow-hidden">
             <div
