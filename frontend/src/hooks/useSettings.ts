@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
 import { ChecklistItem } from '@/lib/types';
-import { resolveLatestVersion } from '@/lib/domain/versioning';
+import { resolveLatestVersion, isDraftVersion } from '@/lib/domain/versioning';
 
 /**
  * 하이드레이션 완료 후에만 마운트되어야 한다 (AppGate 안에서 사용).
@@ -25,6 +25,10 @@ export function useSettings() {
   const [saved, setSaved] = useState(false);
 
   const hasTodayEntry = entries.some(e => e.date === dayjs().format('YYYY-MM-DD'));
+
+  // 최신 버전이 아직 발효 전(사용 대기)인지 — 대기 중에는 수정해도 새 버전이 생기지 않는다
+  const isPendingVersion =
+    !!currentVersion && isDraftVersion(currentVersion, entries, dayjs().format('YYYY-MM-DD'));
 
   const totalScore = items.reduce((sum, item) => sum + item.weight, 0);
   const isValid = totalScore === 10 && items.length > 0;
@@ -120,6 +124,7 @@ export function useSettings() {
     isValid,
     hasChanges,
     hasTodayEntry,
+    isPendingVersion,
     saved,
     updateItem,
     addItem,

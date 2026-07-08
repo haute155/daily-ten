@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/sheet';
 import { api } from '@/lib/api';
 import { useAppStore } from '@/store/appStore';
-import { SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal, Clock } from 'lucide-react';
 
 export default function SettingsPage() {
   return (
@@ -41,6 +41,7 @@ function SettingsPageContent() {
     isValid,
     hasChanges,
     hasTodayEntry,
+    isPendingVersion,
     saved,
     updateItem,
     addItem,
@@ -89,12 +90,26 @@ function SettingsPageContent() {
                 v{currentVersion.versionNumber}
               </span>
               <span className="text-sm font-semibold text-neutral-900">{currentVersion.title}</span>
+              {isPendingVersion && (
+                <span
+                  className="text-[11px] font-semibold text-neutral-600 bg-neutral-100 border border-neutral-200 px-1.5 py-0.5 rounded-sm inline-flex items-center gap-1"
+                  title={`${currentVersion.effectiveFrom}부터 적용됩니다. 그 전에는 수정해도 새 버전이 생기지 않아요.`}
+                >
+                  <Clock size={11} aria-hidden="true" />
+                  사용 대기
+                </span>
+              )}
             </div>
             <p className="text-xs text-brand mt-1">
               {isTomorrowEffective
                 ? `${currentVersion.effectiveFrom}부터 적용 예정`
                 : `${currentVersion.effectiveFrom}부터 적용 중`}
             </p>
+            {isPendingVersion && (
+              <p className="text-[11px] text-neutral-500 mt-1">
+                오늘 기록은 이전 구성으로 유지돼요. 적용 전에는 몇 번을 수정해도 이 버전이 갱신될 뿐, 새 버전이 늘어나지 않아요.
+              </p>
+            )}
 
             {/* Read-only item summary */}
             <ul className="flex flex-col gap-1 mt-3 pt-3 border-t border-brand/10">
@@ -135,7 +150,10 @@ function SettingsPageContent() {
 
       {/* Version history */}
       <div className="py-4">
-        <VersionTimeline versions={versions} />
+        <VersionTimeline
+          versions={versions}
+          pendingVersionId={isPendingVersion && currentVersion ? currentVersion.id : null}
+        />
       </div>
 
       {/* Logout */}
@@ -160,7 +178,7 @@ function SettingsPageContent() {
             <SheetTitle>체크리스트 편집</SheetTitle>
             <SheetDescription>
               {hasTodayEntry
-                ? '변경사항은 내일부터 적용됩니다.'
+                ? '변경사항은 내일부터 적용됩니다. 적용 전에는 몇 번을 고쳐도 새 버전이 생기지 않아요.'
                 : '항목을 추가, 수정, 삭제하고 순서를 조정하세요.'}
             </SheetDescription>
           </SheetHeader>

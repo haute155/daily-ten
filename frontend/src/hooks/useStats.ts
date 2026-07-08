@@ -106,7 +106,10 @@ export function useStats() {
   }, [entries, versions]);
 
   const versionStats = useMemo(() => {
-    return versions.map(version => {
+    // 기록이 하나도 없는 버전(발효 전 draft 포함)은 비교 대상에서 제외 — 의미 있는 버전만 비교
+    return versions
+      .filter(version => entries.some(e => e.checklistVersionId === version.id))
+      .map(version => {
       const vEntries = entries.filter(e => e.checklistVersionId === version.id);
       const avg =
         vEntries.length > 0

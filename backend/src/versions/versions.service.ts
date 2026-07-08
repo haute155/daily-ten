@@ -23,6 +23,8 @@ export class VersionsService {
    * - versionNumber는 마지막 버전 + 1 (append-only)
    * - 오늘 기록이 이미 있으면 effectiveFrom은 내일
    * - 이전 버전은 effectiveFrom 전날로 닫는다
+   * - 단, 최신 버전이 아직 발효 전(draft: 연결 기록 0개 + effectiveFrom ≥ 오늘)이면
+   *   새 버전을 만들지 않고 그 버전을 덮어쓴다 (버전 노이즈 방지 — "버전 = 실제로 살아본 구성")
    */
   async create(userId: string, dto: CreateVersionDto) {
     const totalScore = dto.items.reduce((sum, item) => sum + item.weight, 0);
@@ -45,15 +47,45 @@ export class VersionsService {
       const effectiveFrom = todayEntry
         ? dayjs(dto.clientToday).add(1, 'day').format('YYYY-MM-DD')
         : dto.clientToday;
+      const closePreviousTo = dayjs(effectiveFrom)
+        .subtract(1, 'day')
+        .format('YYYY-MM-DD');
 
       if (latest) {
+        const latestEntryCount = await tx.dailyEntry.count({
+          where: { checklistVersionId: latest.id },
+        });
+        const isDraft =
+          latestEntryCount === 0 && latest.effectiveFrom >= dto.clientToday;
+
+        if (isDraft) {
+          // draft 흡수: 이전 발효 버전의 마감일을 새 적용일 기준으로 재조정하고 draft를 덮어쓴다
+          const previous = await tx.checklistVersion.findFirst({
+            where: { userId, versionNumber: { lt: latest.versionNumber } },
+            orderBy: { versionNumber: 'desc' },
+          });
+          if (previous) {
+            await tx.checklistVersion.update({
+              where: { id: previous.id },
+              data: { effectiveTo: closePreviousTo },
+            });
+          }
+          return tx.checklistVersion.update({
+            where: { id: latest.id },
+            data: {
+              title: dto.title ?? latest.title,
+              items: dto.items.map((item, idx) => ({ ...item, order: idx })),
+              totalScore,
+              changeSummary: dto.changeSummary ?? '',
+              effectiveFrom,
+              effectiveTo: null,
+            },
+          });
+        }
+
         await tx.checklistVersion.update({
           where: { id: latest.id },
-          data: {
-            effectiveTo: dayjs(effectiveFrom)
-              .subtract(1, 'day')
-              .format('YYYY-MM-DD'),
-          },
+          data: { effectiveTo: closePreviousTo },
         });
       }
 

@@ -1,6 +1,20 @@
 import dayjs from 'dayjs';
-import { ChecklistItem, ChecklistVersion, VersionDiff } from '@/lib/types';
+import { ChecklistItem, ChecklistVersion, DailyEntry, VersionDiff } from '@/lib/types';
 import { getCategoryLabel } from './categories';
+
+/**
+ * 아직 "발효되지 않은" 버전(draft) 판정: 연결된 기록이 하나도 없고 적용 시작일이
+ * 오늘 이후인 버전. draft는 수정 시 새 버전을 만들지 않고 덮어써진다 —
+ * "버전 = 실제로 살아본 구성"을 유지해 버전 노이즈를 막는다.
+ */
+export function isDraftVersion(
+  version: ChecklistVersion,
+  entries: DailyEntry[],
+  today: string = dayjs().format('YYYY-MM-DD')
+): boolean {
+  if (version.effectiveFrom < today) return false;
+  return entries.every(e => e.checklistVersionId !== version.id);
+}
 
 /** 해당 날짜에 적용되는 버전. effectiveFrom이 지난 버전 중 가장 최신 버전을 고른다. */
 export function resolveActiveVersion(

@@ -129,7 +129,7 @@ PRD §5가 원본. 코드에서 지켜야 할 불변식:
 **최종 보장 주체는 백엔드 service 계층이다** (`versions.service.ts`, `entries.service.ts`). 프론트는 같은 규칙을 UX용으로 선반영할 뿐이다.
 
 1. **점수**: 서버가 항상 버전 가중치로 재계산한다. 클라이언트가 보낸 score는 무시된다 (ValidationPipe whitelist).
-2. **버전 append-only**: POST /versions는 트랜잭션으로 [최신 버전 effectiveTo 닫기 → versionNumber+1 생성]을 수행한다. 버전 수정 API는 없다.
+2. **버전 append-only + draft 흡수**: POST /versions는 트랜잭션으로 [최신 버전 effectiveTo 닫기 → versionNumber+1 생성]을 수행한다. 단, 최신 버전이 draft(연결 기록 0개 && effectiveFrom ≥ clientToday)면 새 버전 대신 그 버전을 덮어쓴다(번호 유지, 이전 버전 effectiveTo 재조정). 기록이 붙은 버전은 불변. 프론트 판정 함수: `isDraftVersion` — draft 흡수 시 diff/changeSummary는 draft가 아닌 "마지막으로 발효된 버전" 기준으로 계산한다 (appStore.updateVersion).
 3. **적용 시점**: 요청의 `clientToday`에 기록이 있으면 `effectiveFrom = clientToday + 1일`. 날짜의 기준은 클라이언트 로컬(타임존은 클라이언트가 안다).
 4. **기록-버전 연결**: PUT /entries/:date는 기존 기록이면 그 기록의 버전으로, 새 기록이면 해당 날짜의 활성 버전(effectiveFrom ≤ date 중 최신)으로 점수를 계산한다.
 5. **총합 10점**: 서버가 weight 합 ≠ 10이면 400. 프론트도 저장 버튼을 비활성화한다.
@@ -179,7 +179,6 @@ diff 설명 문구는 한국어 문장으로 생성한다 (예: "운동 가중�
 ### P1 — 다듬기
 
 - [ ] 실사용 dogfooding에서 나온 UX 마찰 지점 반영
-- [ ] 버전 히스토리 표시: 한 번도 활성화되지 않은 버전(적용 예정 상태에서 재교체됨)이 "07.08 ~ 07.07"처럼 기간이 뒤집혀 보임 — "적용되지 않음" 표기로 다듬기
 - [ ] 인사이트 문구 데이터 부족 처리: 기록 1개일 때 "지난달보다 평균 +7점 향상" 같은 과장 문구가 나옴 (`getInsightSummary`가 prev30 없을 때 개선폭을 그대로 계산). 최소 기록 수 조건 필요
 - [ ] 백엔드 단위/e2e 테스트: 현재 Nest 스캐폴드 기본 테스트뿐. versions/entries service의 규칙(적용 시점, 재계산)에 대한 테스트 작성
 - [ ] JWT 만료 UX: 만료 시 401 → /login 이동은 되나, 리프레시 토큰 없음 (7일마다 재로그인). 필요해지면 refresh 흐름 도입

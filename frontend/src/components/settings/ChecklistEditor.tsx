@@ -149,7 +149,9 @@ export function ChecklistEditor({
       {hasTodayEntry && (
         <div className="flex items-start gap-2 px-3 py-2.5 rounded-md bg-neutral-100 border border-neutral-200">
           <AlertCircle size={14} className="text-neutral-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
-          <p className="text-xs text-neutral-700">오늘 이미 기록이 있습니다. 변경사항은 내일부터 적용됩니다.</p>
+          <p className="text-xs text-neutral-700">
+            오늘 이미 기록이 있습니다. 변경사항은 내일부터 적용되며, 적용 전에는 다시 수정해도 새 버전이 생기지 않아요.
+          </p>
         </div>
       )}
 

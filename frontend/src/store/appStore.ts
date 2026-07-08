@@ -4,7 +4,7 @@ import { create } from 'zustand';
 import dayjs from 'dayjs';
 import { ChecklistVersion, DailyEntry, ChecklistItem } from '@/lib/types';
 import { api } from '@/lib/api';
-import { createNewVersion } from '@/lib/domain/versioning';
+import { createNewVersion, isDraftVersion, resolveLatestVersion } from '@/lib/domain/versioning';
 
 type LoadStatus = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -60,20 +60,25 @@ export const useAppStore = create<AppStore>()((set, get) => ({
   },
 
   updateVersion: async (newItems) => {
-    const { versions } = get();
-    const latest =
-      versions.length > 0
-        ? versions.reduce((a, b) => (b.versionNumber > a.versionNumber ? b : a))
-        : null;
+    const { versions, entries } = get();
+    const today = dayjs().format('YYYY-MM-DD');
+    const latest = resolveLatestVersion(versions);
 
-    // 변경 요약은 프론트 도메인 로직으로 생성 (표시용), 규칙 적용은 서버가 담당
-    const { version: draft } = createNewVersion(latest, newItems);
+    // 최신 버전이 아직 발효 전(draft)이면 서버가 그 버전을 덮어쓴다.
+    // 변경 요약은 draft가 아니라 "마지막으로 실제 살아본 버전" 기준으로 계산해야 의미가 있다
+    const latestIsDraft = !!latest && isDraftVersion(latest, entries, today);
+    const baseline = latestIsDraft
+      ? resolveLatestVersion(versions.filter(v => v.id !== latest.id))
+      : latest;
+
+    const { version: draft } = createNewVersion(baseline, newItems);
 
     await api.createVersion({
       items: newItems,
       changeSummary: draft.changeSummary,
-      title: draft.title,
-      clientToday: dayjs().format('YYYY-MM-DD'),
+      // draft 흡수 시에는 기존 제목 유지 (서버가 title 미전송 시 유지)
+      ...(latestIsDraft ? {} : { title: draft.title }),
+      clientToday: today,
     });
 
     // 서버가 이전 버전 effectiveTo도 갱신하므로 목록을 다시 불러온다

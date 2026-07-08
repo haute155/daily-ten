@@ -1,12 +1,15 @@
 import { ChecklistVersion } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
+import { Clock } from 'lucide-react';
 import dayjs from 'dayjs';
 
 interface VersionTimelineProps {
   versions: ChecklistVersion[];
+  /** 아직 발효 전(사용 대기)인 버전 id — "현재" 대신 대기 뱃지를 단다 */
+  pendingVersionId?: string | null;
 }
 
-export function VersionTimeline({ versions }: VersionTimelineProps) {
+export function VersionTimeline({ versions, pendingVersionId }: VersionTimelineProps) {
   const sorted = [...versions].sort((a, b) => b.versionNumber - a.versionNumber);
 
   return (
@@ -30,8 +33,19 @@ export function VersionTimeline({ versions }: VersionTimelineProps) {
                   v{version.versionNumber}
                 </Badge>
                 <span className="text-sm font-semibold text-neutral-800">{version.title}</span>
-                {!version.effectiveTo && (
-                  <Badge className="text-xs bg-neutral-900 text-white">현재</Badge>
+                {version.id === pendingVersionId ? (
+                  <Badge
+                    variant="outline"
+                    className="text-xs text-neutral-600 border-neutral-300 inline-flex items-center gap-1"
+                    title={`${version.effectiveFrom}부터 적용됩니다`}
+                  >
+                    <Clock size={10} aria-hidden="true" />
+                    사용 대기
+                  </Badge>
+                ) : (
+                  !version.effectiveTo && (
+                    <Badge className="text-xs bg-neutral-900 text-white">현재</Badge>
+                  )
                 )}
               </div>
               <p className="text-xs text-neutral-400 mt-0.5">
