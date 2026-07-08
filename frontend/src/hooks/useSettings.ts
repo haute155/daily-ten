@@ -16,6 +16,7 @@ export function useSettings() {
   const updateVersion = useAppStore(s => s.updateVersion);
   const versions = useAppStore(s => s.versions);
   const entries = useAppStore(s => s.entries);
+  const customCategories = useAppStore(s => s.customCategories);
 
   // 편집 기준은 최신 버전 (내일부터 적용 예정인 버전 포함)
   const currentVersion = resolveLatestVersion(versions);
@@ -125,6 +126,7 @@ export function useSettings() {
     hasChanges,
     hasTodayEntry,
     isPendingVersion,
+    customCategories,
     saved,
     updateItem,
     addItem,

@@ -1,86 +1,37 @@
 'use client';
 
-import { useState } from 'react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import dayjs from 'dayjs';
 import { useSettings } from '@/hooks/useSettings';
-import { ChecklistEditor } from '@/components/settings/ChecklistEditor';
 import { VersionDiffCard } from '@/components/settings/VersionDiffCard';
 import { VersionTimeline } from '@/components/history/VersionTimeline';
-import dayjs from 'dayjs';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Separator } from '@/components/ui/separator';
 import { AppGate } from '@/components/shared/AppGate';
 import { Button } from '@/components/ui/button';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from '@/components/ui/sheet';
 import { SlidersHorizontal, Clock } from 'lucide-react';
-import { useAppStore } from '@/store/appStore';
-import { CategoryManagerDialog } from '@/components/shared/CategoryManagerDialog';
 
-export default function SettingsPage() {
+export default function RecipePage() {
   return (
     <AppGate>
-      <SettingsPageContent />
+      <RecipePageContent />
     </AppGate>
   );
 }
 
-function SettingsPageContent() {
-  const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const customCategories = useAppStore(s => s.customCategories);
+function RecipePageContent() {
+  const searchParams = useSearchParams();
+  const { currentVersion, versions, isPendingVersion } = useSettings();
 
-  // 항목의 "새 카테고리…" 선택 → 관리 팝업 열고, 생성되면 그 항목에 바로 지정
-  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
-  const [pendingItemId, setPendingItemId] = useState<string | null>(null);
-
-  const handleRequestNewCategory = (itemId: string) => {
-    setPendingItemId(itemId);
-    setCategoryDialogOpen(true);
-  };
-  const {
-    currentVersion,
-    versions,
-    items,
-    totalScore,
-    isValid,
-    hasChanges,
-    hasTodayEntry,
-    isPendingVersion,
-    saved,
-    updateItem,
-    addItem,
-    removeItem,
-    moveItemTo,
-    reorderItems,
-    handleSave,
-    reset,
-  } = useSettings();
-
-  // Find the version just before current to show diff
+  // 편집 페이지에서 저장하고 돌아온 직후 변경 요약 표시 (?saved=1)
+  const justSaved = searchParams.get('saved') === '1';
   const sortedVersions = [...versions].sort((a, b) => b.versionNumber - a.versionNumber);
   const prevVersion = sortedVersions.length > 1 ? sortedVersions[1] : null;
   const latestVersion = sortedVersions.length > 0 ? sortedVersions[0] : null;
 
   const isTomorrowEffective =
     !!currentVersion && currentVersion.effectiveFrom > dayjs().format('YYYY-MM-DD');
-
-  const onSave = async () => {
-    const success = await handleSave();
-    if (success) {
-      setIsEditorOpen(false);
-    }
-  };
-
-  const onSheetOpenChange = (open: boolean) => {
-    if (!open) {
-      reset();
-    }
-    setIsEditorOpen(open);
-  };
 
   return (
     <div className="flex flex-col">
@@ -138,17 +89,16 @@ function SettingsPageContent() {
           </div>
         )}
 
-        <Button
-          onClick={() => setIsEditorOpen(true)}
-          className="w-full h-12 text-base font-semibold rounded-lg bg-neutral-900 hover:bg-neutral-700 text-white shadow-sm"
-        >
-          <SlidersHorizontal size={16} className="mr-1.5" aria-hidden="true" />
-          레시피 편집
-        </Button>
+        <Link href="/recipe/edit" className="block">
+          <Button className="w-full h-12 text-base font-semibold rounded-lg bg-neutral-900 hover:bg-neutral-700 text-white shadow-sm">
+            <SlidersHorizontal size={16} className="mr-1.5" aria-hidden="true" />
+            레시피 편집
+          </Button>
+        </Link>
       </div>
 
       {/* Show diff after save */}
-      {saved && latestVersion && (
+      {justSaved && latestVersion && (
         <div className="px-4 mb-4">
           <VersionDiffCard prev={prevVersion} next={latestVersion} />
         </div>
@@ -163,51 +113,6 @@ function SettingsPageContent() {
           pendingVersionId={isPendingVersion && currentVersion ? currentVersion.id : null}
         />
       </div>
-
-      {/* Edit bottom sheet */}
-      <Sheet open={isEditorOpen} onOpenChange={onSheetOpenChange}>
-        <SheetContent side="bottom" className="h-[85vh] max-h-[85vh]">
-          <SheetHeader>
-            <SheetTitle>레시피 편집</SheetTitle>
-            <SheetDescription>
-              {hasTodayEntry
-                ? '변경사항은 내일부터 적용됩니다. 적용 전에는 몇 번을 고쳐도 새 버전이 생기지 않아요.'
-                : '항목을 추가, 수정, 삭제하고 순서를 조정하세요.'}
-            </SheetDescription>
-          </SheetHeader>
-
-          <div className="flex-1 overflow-y-auto px-4 pb-4">
-            <ChecklistEditor
-              items={items}
-              totalScore={totalScore}
-              isValid={isValid}
-              canSave={isValid && hasChanges}
-              hasTodayEntry={hasTodayEntry}
-              saved={saved}
-              onItemChange={updateItem}
-              onItemAdd={addItem}
-              onItemRemove={removeItem}
-              onItemMoveTo={moveItemTo}
-              onItemReorder={reorderItems}
-              customCategories={customCategories}
-              onRequestNewCategory={handleRequestNewCategory}
-              onSave={onSave}
-            />
-          </div>
-        </SheetContent>
-      </Sheet>
-
-      {/* 카테고리 관리 팝업 — 생성 시 요청한 항목에 바로 지정 */}
-      <CategoryManagerDialog
-        open={categoryDialogOpen}
-        onOpenChange={open => {
-          setCategoryDialogOpen(open);
-          if (!open) setPendingItemId(null);
-        }}
-        onCreated={id => {
-          if (pendingItemId) updateItem(pendingItemId, { category: id });
-        }}
-      />
     </div>
   );
 }
