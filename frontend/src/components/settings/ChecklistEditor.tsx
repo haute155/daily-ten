@@ -34,7 +34,7 @@ interface ChecklistEditorProps {
   onItemRemove: (id: string) => void;
   onItemMoveTo: (id: string, toIndex: number) => void;
   onItemReorder: (activeId: string, overId: string) => void;
-  onCreateCategory: (label: string) => Promise<string | null>;
+  onRequestNewCategory: (itemId: string) => void;
   onSave: () => void;
 }
 
@@ -51,7 +51,7 @@ export function ChecklistEditor({
   onItemRemove,
   onItemMoveTo,
   onItemReorder,
-  onCreateCategory,
+  onRequestNewCategory,
   onSave,
 }: ChecklistEditorProps) {
   const remaining = 10 - totalScore;
@@ -132,7 +132,7 @@ export function ChecklistEditor({
                   onChange={onItemChange}
                   onRemove={onItemRemove}
                   onMoveTo={onItemMoveTo}
-                  onCreateCategory={onCreateCategory}
+                  onRequestNewCategory={onRequestNewCategory}
                 />
               </div>
             ))}

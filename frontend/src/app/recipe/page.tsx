@@ -18,8 +18,8 @@ import {
   SheetDescription,
 } from '@/components/ui/sheet';
 import { SlidersHorizontal, Clock } from 'lucide-react';
-import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
+import { CategoryManagerDialog } from '@/components/shared/CategoryManagerDialog';
 
 export default function SettingsPage() {
   return (
@@ -33,14 +33,13 @@ function SettingsPageContent() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const customCategories = useAppStore(s => s.customCategories);
 
-  const handleCreateCategory = async (label: string): Promise<string | null> => {
-    try {
-      const created = await useAppStore.getState().addCategory(label);
-      return created.id;
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : '카테고리를 추가하지 못했습니다');
-      return null;
-    }
+  // 항목의 "새 카테고리…" 선택 → 관리 팝업 열고, 생성되면 그 항목에 바로 지정
+  const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
+  const [pendingItemId, setPendingItemId] = useState<string | null>(null);
+
+  const handleRequestNewCategory = (itemId: string) => {
+    setPendingItemId(itemId);
+    setCategoryDialogOpen(true);
   };
   const {
     currentVersion,
@@ -191,12 +190,24 @@ function SettingsPageContent() {
               onItemMoveTo={moveItemTo}
               onItemReorder={reorderItems}
               customCategories={customCategories}
-              onCreateCategory={handleCreateCategory}
+              onRequestNewCategory={handleRequestNewCategory}
               onSave={onSave}
             />
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* 카테고리 관리 팝업 — 생성 시 요청한 항목에 바로 지정 */}
+      <CategoryManagerDialog
+        open={categoryDialogOpen}
+        onOpenChange={open => {
+          setCategoryDialogOpen(open);
+          if (!open) setPendingItemId(null);
+        }}
+        onCreated={id => {
+          if (pendingItemId) updateItem(pendingItemId, { category: id });
+        }}
+      />
     </div>
   );
 }

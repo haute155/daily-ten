@@ -19,8 +19,8 @@ interface ChecklistItemCardProps {
   onChange: (id: string, changes: Partial<ChecklistItem>) => void;
   onRemove: (id: string) => void;
   onMoveTo: (id: string, toIndex: number) => void;
-  /** 새 커스텀 카테고리 생성 — 성공 시 id 반환 */
-  onCreateCategory: (label: string) => Promise<string | null>;
+  /** "새 카테고리…" 선택 시 카테고리 관리 팝업 열기 (생성되면 이 항목에 지정) */
+  onRequestNewCategory: (itemId: string) => void;
 }
 
 export function ChecklistItemCard({
@@ -31,7 +31,7 @@ export function ChecklistItemCard({
   onChange,
   onRemove,
   onMoveTo,
-  onCreateCategory,
+  onRequestNewCategory,
 }: ChecklistItemCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
@@ -118,14 +118,10 @@ export function ChecklistItemCard({
         />
         <select
           value={item.category ?? ''}
-          onChange={async e => {
+          onChange={e => {
             const value = e.target.value;
             if (value === NEW_CATEGORY_VALUE) {
-              const label = window.prompt('새 카테고리 이름 (10자 이내)');
-              if (label?.trim()) {
-                const createdId = await onCreateCategory(label.trim());
-                if (createdId) onChange(item.id, { category: createdId });
-              }
+              onRequestNewCategory(item.id);
               return;
             }
             onChange(item.id, { category: value || undefined });
