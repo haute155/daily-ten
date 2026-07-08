@@ -37,7 +37,7 @@ export function DailyCheckForm({
             className={cn(
               'flex items-center gap-3 px-4 py-4 rounded-md border-2 transition-all active:scale-[0.98] text-left',
               isChecked
-                ? 'bg-brand/5 border-brand/30 shadow-sm'
+                ? 'bg-success/5 border-success/30 shadow-sm'
                 : 'bg-white border-neutral-100 hover:border-neutral-200'
             )}
             aria-pressed={isChecked}
@@ -46,7 +46,7 @@ export function DailyCheckForm({
             <div
               className={cn(
                 'w-7 h-7 rounded-[4px] border-2 flex items-center justify-center flex-shrink-0 transition-all',
-                isChecked ? 'bg-brand border-brand' : 'border-neutral-300'
+                isChecked ? 'bg-success border-success' : 'border-neutral-300'
               )}
               aria-hidden="true"
             >
@@ -55,7 +55,7 @@ export function DailyCheckForm({
             <span
               className={cn(
                 'flex-1 font-semibold text-base',
-                isChecked ? 'text-brand' : 'text-neutral-700'
+                isChecked ? 'text-success' : 'text-neutral-700'
               )}
             >
               {item.label}
@@ -64,7 +64,7 @@ export function DailyCheckForm({
               className={cn(
                 'text-sm font-bold px-2.5 py-1 rounded-sm',
                 isChecked
-                  ? 'bg-brand text-white'
+                  ? 'bg-success text-white'
                   : 'bg-neutral-100 text-neutral-500'
               )}
             >
@@ -88,7 +88,7 @@ export function DailyCheckForm({
       {/* 자동 저장 상태 — 저장 성공 시 초록 "저장됨"이 5초간 표시됐다 사라진다 */}
       <div className="flex items-center justify-end gap-1.5 px-1 h-5 text-xs" aria-live="polite">
         {saveState === 'saved' && (
-          <span className="inline-flex items-center gap-1 text-green-600 font-medium">
+          <span className="inline-flex items-center gap-1 text-success font-medium">
             <Check size={12} aria-hidden="true" />
             저장됨
           </span>

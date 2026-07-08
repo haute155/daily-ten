@@ -5,10 +5,12 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  /* 브랜드 액센트 (secondary/강조) — 점수·활성 상태·데이터 전용 */
+  /* 브랜드 액센트 (secondary/강조) — 활성 상태·데이터·아이덴티티 전용 */
   --color-brand: #007fff;
   /* 상태 색: 기준 미달(부정) — 채도 절제된 레드 */
   --color-low: #e5484d;
+  /* 상태 색: 성공/완료 — 체크됨, 저장됨 등 "해냈다"는 피드백 전용 */
+  --color-success: #16a34a;
 }
 
 @theme inline {

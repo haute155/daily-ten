@@ -148,7 +148,7 @@ function HistoryDateContent() {
               className={cn(
                 'flex items-center gap-3 px-4 py-3.5 rounded-md border-2 transition-all text-left',
                 isChecked
-                  ? 'bg-brand/5 border-brand/25'
+                  ? 'bg-success/5 border-success/25'
                   : 'bg-white border-neutral-100',
                 isEditing && 'hover:border-neutral-200 active:scale-[0.98]'
               )}
@@ -158,7 +158,7 @@ function HistoryDateContent() {
               <div
                 className={cn(
                   'w-6 h-6 rounded-[4px] border-2 flex items-center justify-center flex-shrink-0',
-                  isChecked ? 'bg-brand border-brand' : 'border-neutral-300'
+                  isChecked ? 'bg-success border-success' : 'border-neutral-300'
                 )}
                 aria-hidden="true"
               >
@@ -169,7 +169,7 @@ function HistoryDateContent() {
               </span>
               <span className={cn(
                 'text-sm font-semibold px-2 py-0.5 rounded-sm',
-                isChecked ? 'bg-brand/10 text-brand' : 'bg-neutral-100 text-neutral-400'
+                isChecked ? 'bg-success/10 text-success' : 'bg-neutral-100 text-neutral-400'
               )}>
                 +{item.weight}
               </span>

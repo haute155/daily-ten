@@ -70,7 +70,7 @@ export function ChecklistEditor({
         className={cn(
           'flex items-center justify-between px-4 py-3 rounded-md border',
           isValid
-            ? 'bg-brand/5 border-brand/25'
+            ? 'bg-success/5 border-success/25'
             : totalScore > 10
             ? 'bg-low/5 border-low/25'
             : 'bg-neutral-50 border-neutral-200'
@@ -79,7 +79,7 @@ export function ChecklistEditor({
       >
         <div className="flex items-center gap-2">
           {isValid ? (
-            <CheckCircle2 size={16} className="text-brand" aria-hidden="true" />
+            <CheckCircle2 size={16} className="text-success" aria-hidden="true" />
           ) : (
             <AlertCircle size={16} className={totalScore > 10 ? 'text-low' : 'text-neutral-500'} aria-hidden="true" />
           )}
@@ -94,7 +94,7 @@ export function ChecklistEditor({
         <span
           className={cn(
             'text-xl font-bold tabular-nums',
-            isValid ? 'text-brand' : totalScore > 10 ? 'text-low' : 'text-neutral-900'
+            isValid ? 'text-success' : totalScore > 10 ? 'text-low' : 'text-neutral-900'
           )}
           aria-label={`현재 총점 ${totalScore}점`}
         >
@@ -157,9 +157,9 @@ export function ChecklistEditor({
 
       {/* Save */}
       {saved ? (
-        <div className="flex items-center justify-center gap-2 h-12 rounded-lg bg-brand/5 border border-brand/25">
-          <CheckCircle2 size={16} className="text-brand" aria-hidden="true" />
-          <span className="text-sm font-semibold text-brand">새 버전 저장됨!</span>
+        <div className="flex items-center justify-center gap-2 h-12 rounded-lg bg-success/5 border border-success/25">
+          <CheckCircle2 size={16} className="text-success" aria-hidden="true" />
+          <span className="text-sm font-semibold text-success">새 버전 저장됨!</span>
         </div>
       ) : (
         <Button

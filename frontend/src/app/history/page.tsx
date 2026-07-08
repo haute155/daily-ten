@@ -89,7 +89,7 @@ function HistoryPageContent() {
                       <span
                         className={cn(
                           'w-4 h-4 rounded-[3px] border-2 flex items-center justify-center flex-shrink-0',
-                          checked ? 'bg-brand border-brand' : 'bg-white border-neutral-300'
+                          checked ? 'bg-success border-success' : 'bg-white border-neutral-300'
                         )}
                         aria-hidden="true"
                       >
