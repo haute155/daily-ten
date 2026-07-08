@@ -105,7 +105,7 @@ function HistoryDateContent() {
   // 기록도 없고 작성도 불가능한 날짜 (미래 or 레시피가 없던 시절)
   if (!entry && (!canWrite || !version)) {
     return (
-      <div className="flex flex-col">
+      <div className="flex flex-col min-h-[calc(100dvh-5rem)] md:min-h-[calc(min(56rem,100dvh-3rem)-5rem)]">
         <div className="flex items-center gap-2 px-4 pt-6 pb-4">
           <button
             onClick={() => router.back()}
@@ -116,7 +116,7 @@ function HistoryDateContent() {
           </button>
           <h1 className="text-lg font-bold text-neutral-900">{formattedDate}</h1>
         </div>
-        <div className="flex flex-col items-center justify-center py-20 px-4">
+        <div className="flex-1 flex flex-col items-center justify-center px-4 pb-16">
           <div className="w-16 h-16 rounded-lg bg-neutral-100 flex items-center justify-center mb-4">
             <AlertCircle size={28} className="text-neutral-300" aria-hidden="true" />
           </div>

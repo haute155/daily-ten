@@ -28,7 +28,7 @@ export function AppGate({ children }: { children: ReactNode }) {
 
   if (status === 'error') {
     return (
-      <div className="flex flex-col items-center gap-3 px-6 pt-24 text-center">
+      <div className="flex flex-col items-center justify-center gap-3 px-6 text-center min-h-[calc(100dvh-5rem)] md:min-h-[calc(min(56rem,100dvh-3rem)-5rem)]">
         <p className="text-sm text-neutral-600">데이터를 불러오지 못했어요. 서버가 실행 중인지 확인해 주세요.</p>
         <button
           type="button"
