@@ -41,6 +41,7 @@ function StatsPageContent() {
     last30Days,
     weeklyAverages,
     itemFrequency,
+    categoryContribution,
     versionStats,
     bestStreak,
     totalEntries,
@@ -79,6 +80,30 @@ function StatsPageContent() {
           <h2 className="text-sm font-semibold text-neutral-600 mb-3">항목별 달성률 (최근 30일)</h2>
           <div className="p-4 rounded-lg bg-white border border-neutral-100 shadow-sm">
             <ItemFrequencyChart data={itemFrequency} />
+          </div>
+        </section>
+      )}
+
+      {/* Category contribution */}
+      {categoryContribution.length > 0 && (
+        <section className="mt-4 px-4">
+          <h2 className="text-sm font-semibold text-neutral-600 mb-3">카테고리별 점수 기여도 (최근 30일)</h2>
+          <div className="p-4 rounded-lg bg-white border border-neutral-100 shadow-sm flex flex-col gap-2.5">
+            {categoryContribution.map(c => (
+              <div key={c.label} className="flex items-center gap-3">
+                <span className="w-12 flex-shrink-0 text-xs font-medium text-neutral-700">{c.label}</span>
+                <div className="flex-1 h-2 rounded-full bg-neutral-100 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-brand"
+                    style={{ width: `${c.share}%` }}
+                    aria-hidden="true"
+                  />
+                </div>
+                <span className="w-16 flex-shrink-0 text-right text-xs tabular-nums text-neutral-500">
+                  {c.points}점 · {c.share}%
+                </span>
+              </div>
+            ))}
           </div>
         </section>
       )}

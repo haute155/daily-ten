@@ -3,6 +3,7 @@ import {
   ArrayNotEmpty,
   IsArray,
   IsBoolean,
+  IsIn,
   IsInt,
   IsOptional,
   IsString,
@@ -11,12 +12,25 @@ import {
   ValidateNested,
 } from 'class-validator';
 
+export const CATEGORY_KEYS = [
+  'exercise',
+  'sleep',
+  'learning',
+  'healing',
+  'diet',
+  'work',
+] as const;
+
 export class ChecklistItemDto {
   @IsString()
   id: string;
 
   @IsString()
   label: string;
+
+  @IsOptional()
+  @IsIn(CATEGORY_KEYS, { message: '유효하지 않은 카테고리입니다' })
+  category?: (typeof CATEGORY_KEYS)[number];
 
   @IsInt()
   @Min(1)

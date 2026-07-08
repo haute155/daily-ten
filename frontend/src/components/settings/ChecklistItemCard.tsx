@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { ChecklistItem } from '@/lib/types';
+import { ChecklistItem, CategoryKey } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { GripVertical, Trash2, Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { CATEGORIES, UNCATEGORIZED_LABEL, suggestCategory } from '@/lib/domain/categories';
 
 interface ChecklistItemCardProps {
   item: ChecklistItem;
@@ -90,16 +91,43 @@ export function ChecklistItemCard({
         aria-label={`${item.label} 순서 (현재 ${index + 1}번째, 총 ${total}개)`}
       />
 
-      {/* Label */}
-      <Input
-        value={item.label}
-        onChange={e => onChange(item.id, { label: e.target.value })}
-        onFocus={e => e.target.select()}
-        className="flex-1 h-9 text-sm border-neutral-200 focus:ring-brand/30"
-        placeholder="항목 이름"
-        aria-label="항목 이름"
-        maxLength={20}
-      />
+      {/* Label + category */}
+      <div className="flex-1 flex flex-col gap-1 min-w-0">
+        <Input
+          value={item.label}
+          onChange={e => onChange(item.id, { label: e.target.value })}
+          onFocus={e => e.target.select()}
+          onBlur={e => {
+            // 카테고리가 비어 있으면 이름 키워드로 자동 제안 (사용자가 언제든 변경 가능)
+            if (!item.category) {
+              const suggested = suggestCategory(e.target.value);
+              if (suggested) onChange(item.id, { category: suggested });
+            }
+          }}
+          className="h-9 text-sm border-neutral-200 focus:ring-brand/30"
+          placeholder="항목 이름"
+          aria-label="항목 이름"
+          maxLength={20}
+        />
+        <select
+          value={item.category ?? ''}
+          onChange={e =>
+            onChange(item.id, { category: (e.target.value || undefined) as CategoryKey | undefined })
+          }
+          className={cn(
+            'h-7 w-fit text-xs rounded-md border border-neutral-200 bg-white px-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/40',
+            item.category ? 'text-brand font-medium' : 'text-neutral-400'
+          )}
+          aria-label={`${item.label} 카테고리`}
+        >
+          <option value="">{UNCATEGORIZED_LABEL}</option>
+          {CATEGORIES.map(c => (
+            <option key={c.key} value={c.key}>
+              {c.label}
+            </option>
+          ))}
+        </select>
+      </div>
 
       {/* Weight stepper */}
       <div className="flex items-center gap-1">

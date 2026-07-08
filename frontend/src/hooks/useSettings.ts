@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
 import { ChecklistItem } from '@/lib/types';
-import { resolveLatestVersion } from '@/lib/domain/versioning';
+import { resolveLatestVersion, reconcileItemIds } from '@/lib/domain/versioning';
 
 /**
  * 하이드레이션 완료 후에만 마운트되어야 한다 (AppGate 안에서 사용).
@@ -35,7 +35,13 @@ export function useSettings() {
     currentVersion.items.length !== items.length ||
     currentVersion.items.some((it, idx) => {
       const next = items[idx];
-      return !next || next.id !== it.id || next.label !== it.label || next.weight !== it.weight;
+      return (
+        !next ||
+        next.id !== it.id ||
+        next.label !== it.label ||
+        next.weight !== it.weight ||
+        (next.category ?? null) !== (it.category ?? null)
+      );
     });
 
   const updateItem = (id: string, changes: Partial<ChecklistItem>) => {
@@ -92,7 +98,8 @@ export function useSettings() {
   const handleSave = async (): Promise<boolean> => {
     if (!isValid || !hasChanges) return false;
     try {
-      await updateVersion(items);
+      // 삭제 후 같은 이름으로 재생성된 항목은 과거 id를 이어받아 통계 연속성 유지
+      await updateVersion(reconcileItemIds(items, versions));
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
       return true;

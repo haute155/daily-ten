@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import dayjs from 'dayjs';
 import { useAppStore } from '@/store/appStore';
 import { getInsightSummary } from '@/lib/domain/insights';
+import { getCategoryLabel } from '@/lib/domain/categories';
 
 export function useStats() {
   const entries = useAppStore(s => s.entries);
@@ -76,6 +77,34 @@ export function useStats() {
       .sort((a, b) => b.rate - a.rate);
   }, [entries, versions]);
 
+  /** 최근 30일 카테고리별 획득 점수 기여도 (당시 버전의 항목 카테고리 기준) */
+  const categoryContribution = useMemo(() => {
+    const last30 = entries.filter(e => dayjs(e.date).isAfter(dayjs().subtract(31, 'day')));
+
+    const earned = new Map<string, number>(); // categoryLabel → 획득 점수 합
+    let totalEarned = 0;
+
+    last30.forEach(entry => {
+      const version = versions.find(v => v.id === entry.checklistVersionId);
+      if (!version) return;
+
+      version.items.forEach(item => {
+        if (!item.isActive || !entry.checkedItemIds.includes(item.id)) return;
+        const label = getCategoryLabel(item.category);
+        earned.set(label, (earned.get(label) ?? 0) + item.weight);
+        totalEarned += item.weight;
+      });
+    });
+
+    return Array.from(earned.entries())
+      .map(([label, points]) => ({
+        label,
+        points,
+        share: totalEarned > 0 ? Math.round((points / totalEarned) * 100) : 0,
+      }))
+      .sort((a, b) => b.points - a.points);
+  }, [entries, versions]);
+
   const versionStats = useMemo(() => {
     return versions.map(version => {
       const vEntries = entries.filter(e => e.checklistVersionId === version.id);
@@ -120,6 +149,7 @@ export function useStats() {
     last30Days,
     weeklyAverages,
     itemFrequency,
+    categoryContribution,
     versionStats,
     bestStreak,
     totalEntries: entries.length,

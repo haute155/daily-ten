@@ -188,7 +188,7 @@ diff 설명 문구는 한국어 문장으로 생성한다 (예: "운동 가중�
 
 - [ ] 배포: 관리형 Postgres + backend(Railway/Fly) + frontend(Vercel), 환경변수 이관 (JWT_SECRET 교체 필수)
 - [ ] PWA (manifest, service worker, 설치 유도)
-- [ ] AI 추천 실연동 (현재 placeholder)
+- [ ] AI 추천 실연동 (현재 placeholder) + **LLM 카테고리 자동 태깅** (현재는 키워드 휴리스틱 `suggestCategory` — `lib/domain/categories.ts`를 LLM 호출로 교체)
 - [ ] 정량형 항목 스키마 확장
 
 ---
