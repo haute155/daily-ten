@@ -40,8 +40,8 @@ function TodayPageContent() {
 
   if (!version) {
     return (
-      // 하단 네비(pb-20=5rem)를 뺀 화면 높이에서 세로 중앙 정렬. 데스크톱은 프레임 높이 기준
-      <div className="flex flex-col items-center justify-center gap-4 px-6 text-center min-h-[calc(100dvh-5rem)] md:min-h-[calc(min(56rem,100dvh-3rem)-5rem)]">
+      // 하단 네비를 뺀 가용 영역(--content-min-height)에서 세로 중앙 정렬
+      <div className="flex flex-col items-center justify-center gap-4 px-6 text-center min-h-content">
         <Settings size={32} className="text-neutral-300" aria-hidden="true" />
         <div>
           <h1 className="text-lg font-bold text-neutral-900">아직 텐 레시피가 없어요</h1>

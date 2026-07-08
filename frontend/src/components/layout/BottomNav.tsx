@@ -17,10 +17,10 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed md:absolute bottom-0 left-0 right-0 z-50 bg-white border-t border-neutral-200 safe-area-pb"
+      className="fixed md:absolute bottom-0 left-0 right-0 z-50 bg-white border-t border-neutral-200 h-[var(--bottom-nav-total)] pb-[env(safe-area-inset-bottom,0px)]"
       aria-label="하단 네비게이션"
     >
-      <div className="max-w-md mx-auto flex">
+      <div className="max-w-md mx-auto flex h-[var(--bottom-nav-height)]">
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href || pathname.startsWith(href + '/');
           return (
@@ -28,7 +28,7 @@ export function BottomNav() {
               key={href}
               href={href}
               className={cn(
-                'flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors min-h-[56px]',
+                'flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors h-full',
                 isActive
                   ? 'text-brand'
                   : 'text-neutral-400 hover:text-neutral-600'

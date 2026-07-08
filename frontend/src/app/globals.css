@@ -127,6 +127,28 @@
 }
 
 @layer base {
+  /* ── 레이아웃 상수 ───────────────────────────────────────────
+     높이는 여기서만 정의한다. 네비 자신도 이 변수로 그려지므로
+     "빼는 값 = 실제 높이"가 구조적으로 보장된다. */
+  :root {
+    /* 하단 네비게이션 높이 (safe-area 제외) */
+    --bottom-nav-height: 3.5rem;
+    /* 하단 네비 총 높이 = 높이 + iOS 홈 인디케이터 등 safe-area */
+    --bottom-nav-total: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+    /* 모바일: 콘텐츠 가용 높이 = 뷰포트 - 하단 네비 */
+    --content-min-height: calc(100dvh - var(--bottom-nav-total));
+  }
+
+  /* 데스크톱: 폰 프레임 안에서 동작 — 가용 높이 기준이 프레임 높이로 바뀐다 */
+  @media (min-width: 768px) {
+    :root {
+      --frame-max-height: 56rem;
+      --frame-viewport-margin: 3rem;
+      --frame-height: min(var(--frame-max-height), calc(100dvh - var(--frame-viewport-margin)));
+      --content-min-height: calc(var(--frame-height) - var(--bottom-nav-total));
+    }
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
@@ -139,8 +161,7 @@
   }
 }
 
-@layer utilities {
-  .safe-area-pb {
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
+/* 하단 네비를 제외한 가용 영역을 정확히 채운다 (세로 중앙 정렬용) */
+@utility min-h-content {
+  min-height: var(--content-min-height);
 }

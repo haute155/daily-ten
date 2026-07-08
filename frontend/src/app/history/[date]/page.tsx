@@ -105,7 +105,7 @@ function HistoryDateContent() {
   // 기록도 없고 작성도 불가능한 날짜 (미래 or 레시피가 없던 시절)
   if (!entry && (!canWrite || !version)) {
     return (
-      <div className="flex flex-col min-h-[calc(100dvh-5rem)] md:min-h-[calc(min(56rem,100dvh-3rem)-5rem)]">
+      <div className="flex flex-col min-h-content">
         <div className="flex items-center gap-2 px-4 pt-6 pb-4">
           <button
             onClick={() => router.back()}

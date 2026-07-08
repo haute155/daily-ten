@@ -147,7 +147,7 @@ diff 설명 문구는 한국어 문장으로 생성한다 (예: "운동 가중�
 - 하드코딩 최소화 — 매직 넘버(고득점 기준 8점, 트렌드 임계 ±0.2 등)는 도메인 모듈의 상수로.
 - 화려한 애니메이션 금지. 모바일 터치 영역·라벨 등 접근성 기본 준수.
 - UI 문구는 한국어, 담백하게. 색상만으로 상태 구분 금지.
-- **디자인 토큰** (`frontend/src/app/globals.css` @theme): Primary=블랙(`neutral-900` — CTA·제목·큰 숫자), Accent=`brand`(#007fff — 활성/체크/고득점/차트 데이터 전용, 남용 금지), 부정=`low`(#e5484d — 기준 미달·삭제·초과), 성공=`success`(#16a34a — 체크됨·저장됨 등 완료 피드백 전용). 무채색은 `neutral` 스케일만 사용 (slate/indigo/emerald/amber/rose 금지). 라운드는 전역 `--radius: 0.3rem` 기준으로 절제(rounded-md/lg), 파스텔 배경 대신 흰 배경+얇은 테두리. 차트는 데이터 색 #007fff 단일, 그리드는 neutral-200으로 물러나게.
+- **디자인 토큰** (`frontend/src/app/globals.css` @theme): Primary=블랙(`neutral-900` — CTA·제목·큰 숫자), Accent=`brand`(#007fff — 활성/체크/고득점/차트 데이터 전용, 남용 금지), 부정=`low`(#e5484d — 기준 미달·삭제·초과), 성공=`success`(#16a34a — 체크됨·저장됨 등 완료 피드백 전용). 무채색은 `neutral` 스케일만 사용 (slate/indigo/emerald/amber/rose 금지). 라운드는 전역 `--radius: 0.3rem` 기준으로 절제(rounded-md/lg), 파스텔 배경 대신 흰 배경+얇은 테두리. **레이아웃 상수는 CSS 변수로 단일 정의** (globals.css `--bottom-nav-height`/`--bottom-nav-total`/`--frame-height`/`--content-min-height`) — 네비 자신도 변수로 그려져 "빼는 값 = 실제 높이" 보장, 세로 중앙 화면은 `min-h-content` 유틸리티 사용. Tailwind v4에서 커스텀 유틸리티는 `@utility`, 전역 변수는 `@layer base` 안에 정의해야 빌드에서 살아남는다. 차트는 데이터 색 #007fff 단일, 그리드는 neutral-200으로 물러나게.
 - 백엔드: 입력 검증은 DTO + class-validator로, 비즈니스 규칙은 service에서. 에러 메시지는 한국어로 사용자에게 그대로 보여줄 수 있는 문장으로.
 - DB 스키마 변경은 반드시 `prisma migrate dev`로 마이그레이션 파일을 남긴다. `db push` 금지.
 
