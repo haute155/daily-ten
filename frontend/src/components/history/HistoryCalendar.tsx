@@ -1,7 +1,6 @@
 'use client';
 
 import dayjs from 'dayjs';
-import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { DailyEntry } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -13,6 +12,9 @@ interface HistoryCalendarProps {
   daysInMonth: (string | null)[];
   entryMap: Map<string, DailyEntry>;
   versionChangeDates: Set<string>;
+  /** 선택된 날짜 — 하단 미리보기 패널과 연동 */
+  selectedDate: string | null;
+  onSelect: (date: string) => void;
   onPrev: () => void;
   onNext: () => void;
 }
@@ -28,18 +30,12 @@ export function HistoryCalendar({
   daysInMonth,
   entryMap,
   versionChangeDates,
+  selectedDate,
+  onSelect,
   onPrev,
   onNext,
 }: HistoryCalendarProps) {
-  const router = useRouter();
   const today = dayjs().format('YYYY-MM-DD');
-
-  const handleDayClick = (date: string) => {
-    const entry = entryMap.get(date);
-    if (entry || dayjs(date).isBefore(dayjs().add(1, 'day'))) {
-      router.push(`/history/${date}`);
-    }
-  };
 
   return (
     <div className="mx-4">
@@ -89,6 +85,7 @@ export function HistoryCalendar({
           const entry = entryMap.get(date);
           const isToday = date === today;
           const isFuture = dayjs(date).isAfter(dayjs(), 'day');
+          const isSelected = date === selectedDate;
           const hasVersionChange = versionChangeDates.has(date);
           const dayNum = dayjs(date).date();
 
@@ -97,27 +94,33 @@ export function HistoryCalendar({
               key={date}
               role="gridcell"
               aria-label={`${dayjs(date).format('M월 D일')}${entry ? ` - ${entry.score}점` : ' - 기록 없음'}`}
-              onClick={() => handleDayClick(date)}
+              aria-pressed={isSelected}
+              onClick={() => onSelect(date)}
               disabled={isFuture}
               className={cn(
-                'relative aspect-square rounded-md flex flex-col items-center justify-center text-sm transition-all',
-                isFuture
-                  ? 'opacity-20 cursor-not-allowed'
-                  : 'hover:scale-105 active:scale-95',
-                isToday && !entry && 'ring-2 ring-brand/40 ring-offset-1',
+                'relative aspect-square rounded-md flex flex-col transition-all',
+                isFuture ? 'opacity-20 cursor-not-allowed' : 'active:scale-95',
+                isSelected && 'ring-2 ring-brand ring-offset-1',
+                isToday && !isSelected && 'ring-1 ring-brand/40',
                 entry
                   ? getScoreStyle(entry.score)
                   : isToday
                   ? 'bg-brand/5 text-brand'
-                  : 'text-neutral-500'
+                  : 'text-neutral-400'
               )}
             >
-              <span className="text-xs font-medium leading-none">{dayNum}</span>
-              {entry && (
-                <span className="text-[10px] leading-none mt-0.5 opacity-80">
-                  {entry.score}
-                </span>
-              )}
+              {/* 날짜: 상단 정렬 */}
+              <span className="pt-1 w-full text-center text-[10px] font-medium leading-none opacity-70">
+                {dayNum}
+              </span>
+              {/* 점수: 남은 공간 중앙에 크게 */}
+              <span className="flex-1 w-full flex items-center justify-center pb-0.5">
+                {entry && (
+                  <span className="text-base font-bold leading-none tabular-nums tracking-tight">
+                    {entry.score}
+                  </span>
+                )}
+              </span>
               {hasVersionChange && (
                 <span
                   className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-brand"
