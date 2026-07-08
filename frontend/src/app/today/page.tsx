@@ -66,7 +66,7 @@ function TodayPageContent() {
         <h1 className="text-2xl font-black text-neutral-900 mt-0.5 tracking-tight">{today}</h1>
         <div className="flex items-center gap-2 mt-1">
           <span className="text-xs text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded-sm">
-            {version.title} (v{version.versionNumber})
+            레시피 v{version.versionNumber}
           </span>
         </div>
       </div>

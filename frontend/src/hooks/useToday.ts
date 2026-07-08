@@ -8,7 +8,7 @@ import { sendEntryBeacon } from '@/lib/api';
 import { calculateScore } from '@/lib/domain/scoring';
 import { resolveActiveVersion } from '@/lib/domain/versioning';
 
-export type SaveState = 'idle' | 'saving' | 'saved' | 'error';
+export type SaveState = 'idle' | 'saved' | 'error';
 
 /** 자동 저장 디바운스 (ms) — 연속 체크를 한 번의 요청으로 묶는다 */
 const AUTOSAVE_DELAY = 600;
@@ -44,13 +44,11 @@ export function useToday() {
     const pending = pendingRef.current;
     if (!pending) return;
     pendingRef.current = null;
-    setSaveState('saving');
     try {
       await useAppStore.getState().saveTodayEntry(pending.ids, pending.note);
-      // flush 도중 새 변경이 쌓였으면 saved 표시를 덮지 않는다
+      // 저장 중에도 기존 "저장됨" 표시를 유지 — 연속 저장 시 깜빡임 없이 5초 타이머만 연장
       if (!pendingRef.current) {
         setSaveState('saved');
-        // "저장됨"은 5초만 보여주고 사라진다
         if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
         hideTimerRef.current = setTimeout(() => {
           setSaveState(current => (current === 'saved' ? 'idle' : current));

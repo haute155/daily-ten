@@ -29,10 +29,7 @@ export function VersionTimeline({ versions, pendingVersionId }: VersionTimelineP
             {/* Content */}
             <div className="pb-4 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <Badge variant="outline" className="text-xs font-semibold text-brand border-brand/25">
-                  v{version.versionNumber}
-                </Badge>
-                <span className="text-sm font-semibold text-neutral-800">{version.title}</span>
+                <span className="text-sm font-semibold text-neutral-800">레시피 v{version.versionNumber}</span>
                 {version.id === pendingVersionId ? (
                   <Badge
                     variant="outline"

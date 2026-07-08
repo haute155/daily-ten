@@ -69,7 +69,7 @@ function HistoryPageContent() {
             </p>
             {selectedVersion && (
               <p className="text-xs text-neutral-400 mt-0.5">
-                {selectedVersion.title} (v{selectedVersion.versionNumber})
+                레시피 v{selectedVersion.versionNumber}
               </p>
             )}
           </div>

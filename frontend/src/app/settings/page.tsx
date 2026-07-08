@@ -89,7 +89,7 @@ function SettingsPageContent() {
               <span className="text-xs font-bold text-brand bg-white px-2 py-0.5 rounded-sm border border-brand/25">
                 v{currentVersion.versionNumber}
               </span>
-              <span className="text-sm font-semibold text-neutral-900">{currentVersion.title}</span>
+              <span className="text-sm font-semibold text-neutral-900">텐 레시피</span>
               {isPendingVersion && (
                 <span
                   className="text-[11px] font-semibold text-neutral-600 bg-neutral-100 border border-neutral-200 px-1.5 py-0.5 rounded-sm inline-flex items-center gap-1"

@@ -119,7 +119,7 @@ function HistoryDateContent() {
         </button>
         <div className="flex-1">
           <h1 className="text-base font-bold text-neutral-900">{formattedDate}</h1>
-          <p className="text-xs text-neutral-400">{version.title} (v{version.versionNumber})</p>
+          <p className="text-xs text-neutral-400">레시피 v{version.versionNumber}</p>
         </div>
         <ScoreBadge score={isEditing ? currentScore : entry.score} size="lg" />
       </div>

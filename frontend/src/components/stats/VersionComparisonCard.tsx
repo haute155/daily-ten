@@ -23,10 +23,7 @@ export function VersionComparisonCard({ versionStats }: VersionComparisonCardPro
           className="p-4 rounded-lg bg-white border border-neutral-100 shadow-sm"
         >
           <div className="flex items-center gap-2 mb-2">
-            <Badge variant="outline" className="text-xs font-bold text-brand border-brand/25">
-              v{version.versionNumber}
-            </Badge>
-            <span className="text-sm font-semibold text-neutral-800">{version.title}</span>
+            <span className="text-sm font-semibold text-neutral-800">레시피 v{version.versionNumber}</span>
             {!version.effectiveTo && (
               <Badge className="text-xs bg-neutral-900 text-white ml-auto">현재</Badge>
             )}
