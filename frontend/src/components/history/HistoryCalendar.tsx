@@ -94,7 +94,7 @@ export function HistoryCalendar({
               key={date}
               role="gridcell"
               aria-label={`${dayjs(date).format('M월 D일')}${entry ? ` - ${entry.score}점` : ' - 기록 없음'}`}
-              aria-pressed={isSelected}
+              aria-selected={isSelected}
               onClick={() => onSelect(date)}
               disabled={isFuture}
               className={cn(

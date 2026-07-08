@@ -2,98 +2,28 @@
 
 import { ChecklistVersion } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { Check } from 'lucide-react';
+import { Check, CloudUpload } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
+import type { SaveState } from '@/hooks/useToday';
 
 interface DailyCheckFormProps {
   version: ChecklistVersion;
   checkedItemIds: string[];
   note: string;
-  isSaved: boolean;
+  saveState: SaveState;
   onToggle: (id: string) => void;
   onNoteChange: (note: string) => void;
-  onSave: () => void;
-  onEdit: () => void;
 }
 
 export function DailyCheckForm({
   version,
   checkedItemIds,
   note,
-  isSaved,
+  saveState,
   onToggle,
   onNoteChange,
-  onSave,
-  onEdit,
 }: DailyCheckFormProps) {
   const activeItems = version.items.filter(item => item.isActive);
-
-  if (isSaved) {
-    return (
-      <div className="flex flex-col gap-2 px-4">
-        {activeItems.map(item => {
-          const isChecked = checkedItemIds.includes(item.id);
-          return (
-            <div
-              key={item.id}
-              className={cn(
-                'flex items-center gap-3 px-4 py-3.5 rounded-md border transition-colors',
-                isChecked
-                  ? 'bg-brand/5 border-brand/25'
-                  : 'bg-neutral-50 border-neutral-100'
-              )}
-            >
-              <div
-                className={cn(
-                  'w-6 h-6 rounded-[4px] border-2 flex items-center justify-center flex-shrink-0',
-                  isChecked ? 'bg-brand border-brand' : 'border-neutral-300'
-                )}
-                aria-hidden="true"
-              >
-                {isChecked && <Check size={12} className="text-white" strokeWidth={3} />}
-              </div>
-              <span
-                className={cn(
-                  'flex-1 font-medium text-base',
-                  isChecked ? 'text-neutral-800' : 'text-neutral-400'
-                )}
-              >
-                {item.label}
-              </span>
-              <span
-                className={cn(
-                  'text-sm font-semibold px-2 py-0.5 rounded-sm',
-                  isChecked ? 'bg-brand/10 text-brand' : 'bg-neutral-100 text-neutral-400'
-                )}
-              >
-                +{item.weight}
-              </span>
-            </div>
-          );
-        })}
-
-        {note && (
-          <div className="mt-2 px-4 py-3 rounded-md bg-neutral-50 border border-neutral-100">
-            <p className="text-xs text-neutral-400 mb-1">메모</p>
-            <p className="text-sm text-neutral-700">{note}</p>
-          </div>
-        )}
-
-        <div className="mt-2 flex items-center justify-between px-2">
-          <p className="text-xs text-brand font-medium">오늘 기록 완료</p>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onEdit}
-            className="text-xs h-8"
-          >
-            수정하기
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col gap-2 px-4">
@@ -155,13 +85,26 @@ export function DailyCheckForm({
         />
       </div>
 
-      <Button
-        onClick={onSave}
-        className="mt-1 h-12 text-base font-semibold rounded-lg bg-neutral-900 hover:bg-neutral-700 text-white shadow-sm"
-        aria-label="오늘 기록 저장"
+      {/* 자동 저장 상태 — 별도 저장 버튼 없음 */}
+      <div
+        className="flex items-center justify-end gap-1.5 px-1 h-5 text-xs text-neutral-400"
+        aria-live="polite"
       >
-        기록 저장
-      </Button>
+        {saveState === 'saving' && (
+          <>
+            <CloudUpload size={12} className="animate-pulse" aria-hidden="true" />
+            저장 중…
+          </>
+        )}
+        {saveState === 'saved' && (
+          <>
+            <Check size={12} className="text-brand" aria-hidden="true" />
+            자동 저장됨
+          </>
+        )}
+        {saveState === 'error' && <span className="text-low">저장 실패 — 다시 시도해 주세요</span>}
+        {saveState === 'idle' && '체크하면 자동으로 저장돼요'}
+      </div>
     </div>
   );
 }

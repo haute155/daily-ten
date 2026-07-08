@@ -1,19 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import dayjs from 'dayjs';
 import { toast } from 'sonner';
 import { useAppStore } from '@/store/appStore';
+import { sendEntryBeacon } from '@/lib/api';
 import { calculateScore } from '@/lib/domain/scoring';
 import { resolveActiveVersion } from '@/lib/domain/versioning';
 
+export type SaveState = 'idle' | 'saving' | 'saved' | 'error';
+
+/** 자동 저장 디바운스 (ms) — 연속 체크를 한 번의 요청으로 묶는다 */
+const AUTOSAVE_DELAY = 600;
+
 /**
  * 하이드레이션 완료 후에만 마운트되어야 한다 (AppGate 안에서 사용).
- * 렌더 중에는 스토어 getter를 호출하지 말고 구독한 상태에서 직접 파생한다
- * — React Compiler가 getter 호출을 함수 참조 기준으로 메모해 stale 값이 남는다.
+ * 오늘 기록은 명시적 저장 없이 자동 저장된다 — 체크/메모 변경 후 잠깐 뒤 서버로 전송.
  */
 export function useToday() {
-  const saveTodayEntry = useAppStore(s => s.saveTodayEntry);
   const entries = useAppStore(s => s.entries);
   const versions = useAppStore(s => s.versions);
 
@@ -29,35 +33,72 @@ export function useToday() {
     todayEntry?.checkedItemIds ?? []
   );
   const [note, setNote] = useState(todayEntry?.note ?? '');
-  const [isEditing, setIsEditing] = useState(false);
+  const [saveState, setSaveState] = useState<SaveState>('idle');
 
-  const toggleItem = (itemId: string) => {
-    setCheckedItemIds(prev =>
-      prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId]
-    );
-  };
+  // 마지막 변경 내용과 타이머 — 언마운트 시에도 유실 없이 전송하기 위해 ref로 유지
+  const pendingRef = useRef<{ ids: string[]; note: string } | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const currentScore = version ? calculateScore(checkedItemIds, version) : 0;
-
-  const handleSave = async () => {
+  const flush = async () => {
+    const pending = pendingRef.current;
+    if (!pending) return;
+    pendingRef.current = null;
+    setSaveState('saving');
     try {
-      await saveTodayEntry(checkedItemIds, note);
-      setIsEditing(false);
+      await useAppStore.getState().saveTodayEntry(pending.ids, pending.note);
+      // flush 도중 새 변경이 쌓였으면 saved 표시를 덮지 않는다
+      if (!pendingRef.current) setSaveState('saved');
     } catch (e) {
+      setSaveState('error');
       toast.error(e instanceof Error ? e.message : '저장에 실패했습니다');
     }
   };
 
-  const handleEdit = () => {
-    const entry = useAppStore.getState().getTodayEntry();
-    if (entry) {
-      setCheckedItemIds(entry.checkedItemIds);
-      setNote(entry.note);
-    }
-    setIsEditing(true);
+  const scheduleSave = (ids: string[], noteValue: string) => {
+    pendingRef.current = { ids, note: noteValue };
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => void flush(), AUTOSAVE_DELAY);
   };
 
-  const isSaved = !!todayEntry && !isEditing;
+  // 페이지 이탈 시 대기 중인 변경을 유실 없이 전송
+  // - SPA 내 이동: 언마운트 cleanup에서 일반 저장
+  // - 새로고침/탭 닫기: pagehide에서 keepalive fetch (문서가 내려가도 전송 유지)
+  useEffect(() => {
+    const today = dayjs().format('YYYY-MM-DD');
+    const onPageHide = () => {
+      const pending = pendingRef.current;
+      if (!pending) return;
+      pendingRef.current = null;
+      if (timerRef.current) clearTimeout(timerRef.current);
+      sendEntryBeacon(today, { checkedItemIds: pending.ids, note: pending.note });
+    };
+    window.addEventListener('pagehide', onPageHide);
+
+    return () => {
+      window.removeEventListener('pagehide', onPageHide);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      const pending = pendingRef.current;
+      if (pending) {
+        pendingRef.current = null;
+        void useAppStore.getState().saveTodayEntry(pending.ids, pending.note);
+      }
+    };
+  }, []);
+
+  const toggleItem = (itemId: string) => {
+    const next = checkedItemIds.includes(itemId)
+      ? checkedItemIds.filter(id => id !== itemId)
+      : [...checkedItemIds, itemId];
+    setCheckedItemIds(next);
+    scheduleSave(next, note);
+  };
+
+  const handleNoteChange = (value: string) => {
+    setNote(value);
+    scheduleSave(checkedItemIds, value);
+  };
+
+  const currentScore = version ? calculateScore(checkedItemIds, version) : 0;
 
   return {
     version,
@@ -65,12 +106,9 @@ export function useToday() {
     checkedItemIds,
     note,
     currentScore,
-    isSaved,
-    isEditing,
+    saveState,
     toggleItem,
-    setNote,
-    handleSave,
-    handleEdit,
+    handleNoteChange,
     entries,
   };
 }

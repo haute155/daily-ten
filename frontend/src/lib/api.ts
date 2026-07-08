@@ -25,6 +25,24 @@ export class ApiError extends Error {
   }
 }
 
+export function authHeaders(): Record<string, string> {
+  const token = tokenStore.get();
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
+/** 페이지 이탈 직전 마지막 자동 저장 — keepalive로 언로드 후에도 전송이 살아남는다 */
+export function sendEntryBeacon(date: string, payload: { checkedItemIds: string[]; note: string }) {
+  void fetch(`${API_URL}/entries/${date}`, {
+    method: 'PUT',
+    headers: authHeaders(),
+    body: JSON.stringify(payload),
+    keepalive: true,
+  });
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = tokenStore.get();
   const res = await fetch(`${API_URL}${path}`, {

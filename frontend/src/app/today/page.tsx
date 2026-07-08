@@ -8,8 +8,6 @@ import { DailyCheckForm } from '@/components/today/DailyCheckForm';
 import { ScoreSummaryCard } from '@/components/today/ScoreSummaryCard';
 import { InsightBanner } from '@/components/today/InsightBanner';
 import { getGreeting } from '@/lib/domain/insights';
-import { toast } from 'sonner';
-import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Settings } from 'lucide-react';
 import { AppGate } from '@/components/shared/AppGate';
@@ -32,22 +30,10 @@ function TodayPageContent() {
     checkedItemIds,
     note,
     currentScore,
-    isSaved,
+    saveState,
     toggleItem,
-    setNote,
-    handleSave,
-    handleEdit,
+    handleNoteChange,
   } = useToday();
-
-  const prevSavedRef = useRef(isSaved);
-  useEffect(() => {
-    if (!prevSavedRef.current && isSaved) {
-      toast.success('오늘 기록이 저장됐어요!', {
-        description: `${currentScore}점 달성`,
-      });
-    }
-    prevSavedRef.current = isSaved;
-  }, [isSaved, currentScore]);
 
   const greeting = getGreeting();
   const today = dayjs().format('M월 D일 dddd');
@@ -96,11 +82,9 @@ function TodayPageContent() {
         version={version}
         checkedItemIds={checkedItemIds}
         note={note}
-        isSaved={isSaved}
+        saveState={saveState}
         onToggle={toggleItem}
-        onNoteChange={setNote}
-        onSave={handleSave}
-        onEdit={handleEdit}
+        onNoteChange={handleNoteChange}
       />
     </div>
   );
